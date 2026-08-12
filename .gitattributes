@@ -1,0 +1,18 @@
+# Line endings are part of the measurement in this repository.
+#
+# The corpus is pinned by checksum in corpus/MANIFEST.sha256. Git for Windows
+# installs with core.autocrlf=true by default, which rewrites LF to CRLF on
+# checkout. The scores would not move — Path.read_text() opens in universal-newlines
+# mode, so the pipeline never sees a \r — but the bytes on disk change, and
+# tools/verify_corpus.py would report CHANGED on a clean clone. That is the damage:
+# a pin that cries wolf on every Windows machine teaches people to delete the
+# manifest, which is exactly how a real corpus swap goes unnoticed in October.
+#
+# Last matching pattern wins, so the general rule goes first.
+
+* text=auto
+
+corpus/*.txt           text eol=lf
+corpus/MANIFEST.sha256 text eol=lf
+
+*.pdf binary

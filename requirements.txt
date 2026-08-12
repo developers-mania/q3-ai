@@ -1,0 +1,9 @@
+# Session 01 dependencies — deliberately tiny.
+#
+# Nothing here needs a network connection, an API key, or an account. That is the
+# point: today measures retrieval, and retrieval is measurable offline. Sessions
+# that genuinely need inference will add to this file and say so in their own
+# content pack.
+
+scikit-learn==1.9.0    # TF-IDF index and cosine similarity
+PyYAML==6.0.3          # the evaluation set

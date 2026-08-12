@@ -1,0 +1,56 @@
+# Sprint26 Q3 — the fixed evaluation set.
+#
+# This file is the measurement instrument for the whole quarter. It is versioned,
+# it grows, and it never shrinks. Changes go through pull requests like any other code.
+#
+# ---------------------------------------------------------------------------
+# SCHEMA
+# ---------------------------------------------------------------------------
+#   id        q01, q02, ... — stable forever. Never renumber; the id is how a
+#             question is tracked across ten weeks of scores.
+#   question  Asked of the retriever verbatim.
+#   answer    Human-readable. What goes on the board, what a person checks.
+#   expect    List of literal strings. The score is a HIT if any one of them
+#             appears in a retrieved chunk. This is what the machine matches on.
+#   source    Section citation. Anyone must be able to verify in ten seconds.
+#   note      Optional. Flag near-miss traps and their pair here.
+#
+# WHY `answer` and `expect` are separate fields:
+#   Statutes spell numbers out in words. The Act says "seventy-two hours"; the
+#   answer a human writes on the board is "72 hours". A substring test on `answer`
+#   alone scores a MISS on a perfect retrieval — the baseline would read near 0%
+#   for a reason that has nothing to do with the pipeline. `expect` holds every
+#   surface form the corpus might actually use.
+#
+# ---------------------------------------------------------------------------
+# THE RULES FOR A QUESTION
+# ---------------------------------------------------------------------------
+#   1. The answer must be IN the corpus. A question the documents do not answer
+#      measures the model's training data, not this system.
+#   2. The answer must be UNAMBIGUOUS — a number, a date, a named body, a closed
+#      list. "What does the Act say about consent?" cannot be scored.
+#   3. The answer must be VERIFIABLE IN ONE PLACE, cited by section.
+#   4. Some questions must be NEAR-MISS TRAPS — worded closely to a different
+#      answer elsewhere in the corpus. Without these the set flatters you.
+#
+# ---------------------------------------------------------------------------
+# EXAMPLE — commented out. The set is the room's work, not the facilitator's.
+# ---------------------------------------------------------------------------
+# - id: q01
+#   question: >-
+#     Within how many hours must a data controller notify the Data
+#     Commissioner of a personal data breach?
+#   answer: "72 hours"
+#   expect: ["seventy-two hours", "seventy two hours", "72 hours"]
+#   source: "DPA s.43(1)(a)"
+#
+# - id: q02
+#   question: >-
+#     Within how many hours must a data processor notify the data
+#     controller of a personal data breach?
+#   answer: "48 hours"
+#   expect: ["forty-eight hours", "forty eight hours", "48 hours"]
+#   source: "DPA s.43(3)"
+#   note: "near-miss trap for q01 — shares every content word but two role names"
+
+[]

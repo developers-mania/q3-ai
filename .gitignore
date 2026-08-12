@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Generated from sessions/sNN/lab.py by tools/build_notebooks.py.
+# WHY not committed: .ipynb is JSON with embedded outputs and execution counts.
+# It diffs badly and merges worse, which would wreck the fix-forward rule in
+# CONTRIBUTING.md. The .py is the source of truth; the notebook is a build artifact.
+notebooks/
+
+# Nothing under corpus/ is ignored. The corpus is committed and frozen — see the
+# first non-negotiable in CLAUDE.md. Extraction is not deterministic across tools,
+# so a participant who converts their own sources indexes different bytes and the
+# baseline stops being one reproducible number. MANIFEST.sha256 is the pin that
+# makes every score this quarter comparable, so it must survive a clone.
+
+# Facilitator inputs, not the frozen artifact. The .txt in corpus/ is what ships;
+# these are the PDFs it was converted from, and they are large.
+sources/

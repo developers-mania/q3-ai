@@ -1,0 +1,11 @@
+# Facilitator-only tooling. Participants do not need this file.
+#
+# WHY separate: requirements.txt is read aloud in the room as evidence that
+# Session 01 needs almost nothing — no key, no account, no network. Adding build
+# and conversion tooling to it would undercut that. Notebook generation and corpus
+# preparation are facilitator concerns, done before Wednesday.
+
+-r requirements.txt
+jupytext==1.16.4       # sessions/sNN/lab.py  ->  notebooks/sNN.ipynb (Colab)
+python-docx==1.1.2     # tools/prepare_corpus.py — .docx sources
+pdfplumber==0.11.4     # tools/prepare_corpus.py — .pdf fallback where poppler is absent
