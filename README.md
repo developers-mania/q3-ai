@@ -71,17 +71,36 @@ python -m src.pipeline --score   # run eval/questions.yaml, print the accuracy
 
 ---
 
+## New here? Read these two
+
+| | |
+|---|---|
+| [**docs/repository-guide.md**](docs/repository-guide.md) | How this repository is laid out, what you touch and what you never touch, the branch model, and the measurement spine. **Ten minutes, read it first.** |
+| [**sessions/README.md**](sessions/README.md) | The ten sessions, and a codelab guide for each — what to check out, where to look, what it builds, and **how to know it worked** |
+
+Going to a session? Open that session's guide:
+[01](sessions/s01/README.md) · [02](sessions/s02/README.md) ·
+[03](sessions/s03/README.md) · [04](sessions/s04/README.md) ·
+[05](sessions/s05/README.md) · [06](sessions/s06/README.md) ·
+[07](sessions/s07/README.md) · [08](sessions/s08/README.md) ·
+[09](sessions/s09/README.md) · [10](sessions/s10/README.md)
+
 ## Repository layout
 
 ```
-corpus/          the two source documents — provenance and checksums
+corpus/          the two source documents — provenance and checksums. FROZEN
 fixtures/        pre-recorded model output, so the opening hook runs offline
 src/pipeline.py  the growing library — this is what changes week to week
-sessions/sNN/    the codelab for each session (jupytext percent format)
-eval/            the question set, and the score
+sessions/sNN/    codelab guide (README.md) + the lab as a .py notebook
+eval/            the question set, and the score — the measurement spine
 docs/            flaws, decisions, layer ownership, the Session 10 standard
 tools/           setup check, corpus verification, notebook generation
 ```
+
+Two things that surprise people: **`src/pipeline.py` does not exist on a `-start`
+branch** — it is built live in the room, and appears on `solution/session-NN`. And
+`notebooks/` is a gitignored build artifact; the `.py` under `sessions/` is the
+source of truth.
 
 ## Branching
 
