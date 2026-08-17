@@ -40,7 +40,94 @@ not mistakes. **They are the syllabus.**
 
 ---
 
-## 2 · Before you start
+## 2 · Working through this on your own
+
+**Missed the session, or joined late? This session is fully self-contained.** You do
+not need a facilitator, a room, or a network. Everything below runs offline on a
+mid-range laptop.
+
+### Which branch do I want?
+
+This is the one thing that confuses people, so decide it first:
+
+| If you want to… | Check out | Because |
+|---|---|---|
+| **Work through it alone** | **`solution/session-01`** | The finished code is here. **Start here if you missed the session** |
+| Type it yourself, as the room did | `session-01-start` | `src/pipeline.py` is *absent* — you write it. Nothing is broken |
+| See what the session actually taught | — | `git diff session-01-start solution/session-01` |
+
+```bash
+git clone https://github.com/developers-mania/q3-ai.git && cd q3-ai
+git checkout solution/session-01
+
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+python tools/check_setup.py        # four OK lines
+```
+
+### The whole session in one command
+
+```bash
+python sessions/s01/lab.py
+```
+
+That is a narrated walkthrough of all six steps — load, chunk, index, retrieve,
+the evaluation set, the score — with the flaws named as they appear and the
+"what have we thrown away?" questions asked and answered. It takes about a
+minute to run and is the closest thing to having been in the room.
+
+Prefer a notebook? It converts to one, and runs in Colab with no local install:
+
+```bash
+pip install -r requirements-dev.txt
+python tools/build_notebooks.py s01     # -> notebooks/s01.ipynb
+```
+
+### Getting a number without the room
+
+`eval/questions.yaml` is **empty**, and that is correct — it is the room's twenty
+questions and it is deliberately not pre-filled. But a session with no number has
+no point, so a verified seed set ships alongside it:
+
+```bash
+python -m src.pipeline --score --questions eval/seed-questions.yaml
+```
+
+```
+SEED SET RETRIEVAL ACCURACY: 47%  (15 questions)
+```
+
+**47% is the number to expect.** If you get it, your pipeline and corpus are
+correct and you have reproduced Session 01.
+
+> **This is your number for learning, not the cohort baseline.**
+> [`eval/baseline.md`](../../eval/baseline.md) is scored against the room's
+> `eval/questions.yaml`. Do not copy the seed set into it — a measurement set has to
+> be the room's own work, or the quarter is measuring a facilitator's guesses.
+
+Read [`eval/seed-questions.yaml`](../../eval/seed-questions.yaml) in full before
+writing your own questions. Its comments are half the lesson of step 5: why
+`expect` exists, why some expect strings are deliberately long, and which four
+questions are *designed* to fail until Session 04.
+
+### The opening hook, without a model
+
+The session opens by asking a model a question it should know, and watching it
+answer confidently and wrongly. That needs a model, and
+[`fixtures/opening-hook.md`](../../fixtures/opening-hook.md) is a placeholder until
+a facilitator records one — **do not read it as if it were a real response.**
+
+You can reach the same point with no model at all, because the retriever fails the
+same way. Run check 3 in §6 below: two questions, the same top-ranked chunk, and
+for one of them that chunk holds the **wrong deadline**. No exception, no error, no
+warning — a confident wrong answer from a system that gave no sign anything was
+amiss. That is the whole point of the hook.
+
+---
+
+## 3 · Before you start (in the room)
 
 ```bash
 git clone https://github.com/developers-mania/q3-ai.git && cd q3-ai
@@ -79,7 +166,7 @@ blocked by an environment that will not install.
 
 ---
 
-## 3 · Where to look in the repository
+## 4 · Where to look in the repository
 
 | File | What to do with it |
 |---|---|
@@ -97,7 +184,7 @@ you can ignore today.
 
 ---
 
-## 4 · The six steps
+## 5 · The six steps
 
 | Time | Step | Who is working |
 |---|---|---|
@@ -148,7 +235,7 @@ grep -in "seventy" corpus/dpa-2019.txt
 
 ---
 
-## 5 · How to know it worked
+## 6 · How to know it worked
 
 Run these. This is the checklist — if all six pass, the session succeeded.
 
@@ -242,7 +329,7 @@ git push -u origin session-01-baseline
 
 ---
 
-## 6 · The five flaws you will have created
+## 7 · The five flaws you will have created
 
 Written on the board as each is named. **This list is the syllabus** — nobody had
 to decide what to teach next; the flaws named themselves as soon as the thing ran.
@@ -262,7 +349,7 @@ it came from.
 
 ---
 
-## 7 · What you should be able to explain afterwards
+## 8 · What you should be able to explain afterwards
 
 If you cannot answer these without looking, re-read the Study Guide.
 
@@ -277,7 +364,7 @@ If you cannot answer these without looking, re-read the Study Guide.
 
 ---
 
-## 8 · If it goes wrong
+## 9 · If it goes wrong
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -286,11 +373,11 @@ If you cannot answer these without looking, re-read the Study Guide.
 | `CHANGED` from `verify_corpus.py` | Corpus edited, or CRLF | `git checkout -- corpus/` and re-run |
 | Chunk count ≠ 552 | Different corpus bytes | `python tools/verify_corpus.py` |
 | Everything scores MISS | `expect` written from the publication, not the corpus | `grep -in "<phrase>" corpus/dpa-2019.txt` |
-| Score is suspiciously high | Questions too easy | Harden them — see §5 check 5 |
+| Score is suspiciously high | Questions too easy | Harden them — see §6 check 5 |
 
 ---
 
-## 9 · Before Session 02
+## 10 · Before Session 02
 
 - **Re-run today's pipeline** on your own machine if you did not follow along live.
   The branch is `session-01-baseline`.

@@ -1,0 +1,252 @@
+# Sprint26 Q3 — the SEED question set.
+#
+# ---------------------------------------------------------------------------
+# THIS IS NOT THE QUARTER'S EVALUATION SET.
+# ---------------------------------------------------------------------------
+# The quarter's set is eval/questions.yaml, and it is the ROOM'S work. It is
+# written by participants in Session 01 step 5, it grows every week, and it never
+# shrinks. The baseline in eval/baseline.md is scored against that file, not this
+# one.
+#
+# This file has two jobs and neither of them is measurement:
+#
+#   1. A WORKED EXAMPLE. Groups that see a model question before writing their own
+#      produce good questions in four minutes. Groups that do not spend eight
+#      minutes deciding what a question is. Print this, or read two or three aloud.
+#
+#   2. A SELF-STUDY PATH. Anyone working through Session 01 alone — because they
+#      missed it, or joined late — needs something to score against or the session
+#      has no number and therefore no point:
+#
+#          python -m src.pipeline --score --questions eval/seed-questions.yaml
+#
+#      The number this produces is YOUR number for learning purposes. It is not
+#      the cohort baseline and it is not comparable to eval/baseline.md.
+#
+# Do not copy these wholesale into eval/questions.yaml. The measurement set has to
+# be the room's own work or the quarter is measuring a facilitator's guesses.
+#
+# ---------------------------------------------------------------------------
+# EVERY `expect` STRING BELOW WAS GREPPED FROM corpus/, NOT COPIED FROM THE ACT
+# ---------------------------------------------------------------------------
+# This is the rule that catches people out. Statutes spell numbers out: the Act
+# says "seventy-two hours" where a question writer types "72 hours". A substring
+# test against the board answer scores MISS on a PERFECT retrieval.
+#
+# So `answer` is human-readable and goes on the board; `expect` is the list of
+# surface forms the corpus actually uses, and `expect` is what the scorer matches.
+# Check before you write a question:
+#
+#     grep -in "seventy" corpus/dpa-2019.txt
+#
+# Two forms below survive only because src.pipeline.normalise_for_match() collapses
+# whitespace and treats hyphens as spaces:
+#   - q03 "ninety days" is split across a line break in the source ("ninety\ndays")
+#   - q11 the ministry name wraps mid-phrase
+# Without that rule both would score MISS on a perfect retrieval. See docs/decisions.md.
+#
+# ---------------------------------------------------------------------------
+# WHY SOME `expect` STRINGS ARE LONGER THAN THE ANSWER
+# ---------------------------------------------------------------------------
+# The scorer asks "did any expected string appear in a retrieved chunk?" — so a
+# phrase that appears in SEVERAL places can score a HIT off the WRONG passage.
+# Counted across the corpus:
+#
+#     "five million shillings"   3x   (ss.58, 61 AND 63 — criminal and administrative)
+#     "one per centum"           1x   (s.63 only)                    <- use this
+#     "twenty-one days"          2x   (s.7 Public Service Commission AND s.58)
+#     "ten years"                2x   (s.30 qualifications AND s.73 penalty)
+#     "four enablers"            2x   (Kenya's strategy AND Egypt's, in the
+#                                      benchmarking chapter — a genuine trap)
+#
+# Where a short form is ambiguous the longer, unique form is used. A question that
+# scores HIT for the wrong reason is worse than one that scores MISS.
+#
+# ---------------------------------------------------------------------------
+# THE RULES FOR A QUESTION
+# ---------------------------------------------------------------------------
+#   1. The answer must be IN the corpus.
+#   2. The answer must be UNAMBIGUOUS — a number, a date, a named body, a closed list.
+#   3. The answer must be VERIFIABLE IN ONE PLACE, cited by section.
+#   4. Some questions must be NEAR-MISS TRAPS.
+#
+# NOTE ON APPENDIX A OF THE CONTENT PACK: its eighth seed question asks for the
+# date the National AI Strategy was launched and the ministry that launched it. It
+# is not reproduced here, because it breaks rules 1 and 2 against this corpus. The
+# Strategy text says only "March 2025" — there is no day of the month anywhere in
+# it, so "27 March 2025" cannot be retrieved however good the pipeline gets. It
+# also asks two things at once. It is replaced by q10 and q11 below.
+# ---------------------------------------------------------------------------
+
+- id: s01
+  question: >-
+    Within how many hours must a data controller notify the Data
+    Commissioner of a personal data breach?
+  answer: "72 hours"
+  expect: ["seventy-two hours", "seventy two hours", "72 hours"]
+  source: "DPA s.43(1)(a)"
+  note: >-
+    The pair with s02. Demonstrate these two together — they share nearly every
+    content word and a keyword index cannot separate them.
+
+- id: s02
+  question: >-
+    Within how many hours must a data processor notify the data
+    controller of a personal data breach?
+  answer: "48 hours"
+  expect: ["forty-eight hours", "forty eight hours", "48 hours"]
+  source: "DPA s.43(3)"
+  note: >-
+    NEAR-MISS TRAP for s01. Every content word is shared except two role names,
+    and both roles appear in both passages.
+
+- id: s03
+  question: >-
+    Within what period must a complaint to the Data Commissioner be
+    investigated and concluded?
+  answer: "90 days"
+  expect: ["ninety days", "90 days"]
+  source: "DPA s.56(5)"
+  note: >-
+    Split across a line break in the source. Scores only because
+    normalise_for_match() collapses whitespace.
+
+- id: s04
+  question: >-
+    What is the maximum administrative fine the Data Commissioner may
+    impose in a penalty notice?
+  answer: "Up to five million shillings, or 1% of annual turnover of the preceding financial year — whichever is lower"
+  expect: ["one per centum", "one per cent"]
+  source: "DPA s.63"
+  note: >-
+    `expect` deliberately avoids "five million shillings", which appears three
+    times in the Act — in ss.58 and 61 as CRIMINAL fines and only here as the
+    administrative maximum. "one per centum" is unique to s.63.
+
+- id: s05
+  question: How long is the Data Commissioner's term of office, and is it renewable?
+  answer: "A single term of six years; not eligible for re-appointment"
+  expect: ["single term of six years", "six years"]
+  source: "DPA s.7(2)"
+
+- id: s06
+  question: Within what period must a data portability request be complied with?
+  answer: "30 days, at reasonable cost"
+  expect: ["thirty days", "30 days"]
+  source: "DPA s.38(6)"
+  note: >-
+    NEAR-MISS TRAP for s03 and s07 — three different periods, all phrased as
+    "within a period of N days".
+
+- id: s07
+  question: >-
+    How many days before the processing of data must a data protection
+    impact assessment report be submitted?
+  answer: "60 days"
+  expect: ["sixty days", "60 days"]
+  source: "DPA s.31(5)"
+
+- id: s08
+  question: >-
+    What is the minimum period an enforcement notice must allow for
+    compliance?
+  answer: "Not less than 21 days"
+  expect: ["not be less than twenty-one days", "not be less than 21 days"]
+  source: "DPA s.58(2)(c)"
+  note: >-
+    `expect` is the long form on purpose — "twenty-one days" alone also matches
+    s.7(3), which is about the Public Service Commission and is a different
+    answer entirely.
+
+- id: s09
+  question: >-
+    What is the general penalty for an offence under the Act for which no
+    specific penalty is provided?
+  answer: "A fine not exceeding three million shillings, or imprisonment up to ten years, or both"
+  expect: ["three million shillings"]
+  source: "DPA s.73(1)"
+  note: >-
+    NEAR-MISS TRAP for s04 — the administrative fine is five million, this
+    general penalty is three million. "ten years" is not used as an expect
+    string because it also appears in s.30 as an experience requirement.
+
+- id: s10
+  question: How many key pillars is the Kenya National AI Strategy anchored by?
+  answer: "Three"
+  expect: ["three key pillars"]
+  source: "AI Strategy — overview"
+  note: >-
+    Answerable only because the Strategy was re-extracted on 17 August 2026. The
+    earlier conversion flattened its two-column layout, which wedged an unrelated
+    sentence between "three" and "key" and destroyed the phrase. See
+    docs/decisions.md.
+
+- id: s11
+  question: How many enablers support the pillars of the Kenya National AI Strategy?
+  answer: "Four"
+  expect: ["supported by four enablers"]
+  source: "AI Strategy — overview"
+  note: >-
+    NEAR-MISS TRAP, and a live one. "four enablers" alone appears TWICE — once
+    for Kenya and once for EGYPT in the benchmarking chapter, which also has four
+    pillars. The short form would score a HIT off the wrong country. The longer
+    phrase is unique to the Kenyan statement.
+
+# ---------------------------------------------------------------------------
+# PARAPHRASE QUESTIONS — the ones a keyword index is SUPPOSED to fail
+# ---------------------------------------------------------------------------
+# Every question above uses the Act's own vocabulary: notify, Data Commissioner,
+# breach, data controller. That is exactly what TF-IDF is good at, so a set built
+# only from those flatters the pipeline and hides the flaw the quarter exists to
+# fix.
+#
+# The four below ask the SAME questions in the words an ordinary person would use
+# — regulator instead of Commissioner, leak instead of breach, watchdog instead of
+# Data Commissioner. The answers are in the corpus and verified. All four MISS on
+# 5 August, because "notify the Commissioner" and "tell the regulator" share no
+# terms and score near zero against each other.
+#
+#   That is FLAW 2 — the index matches words, not meaning. Owner: Session 04.
+#
+# These are the questions to re-run first when Session 04 replaces the index with
+# embeddings. If they do not turn into HITs, the embeddings are not earning their
+# cost.
+
+- id: p01
+  question: How quickly must a company tell the regulator when customer records leak?
+  answer: "72 hours"
+  expect: ["seventy-two hours", "seventy two hours", "72 hours"]
+  source: "DPA s.43(1)(a)"
+  note: "PARAPHRASE of s01. Expected MISS until Session 04."
+
+- id: p02
+  question: >-
+    How long does someone have to wait for a ruling after complaining to
+    the privacy watchdog?
+  answer: "90 days"
+  expect: ["ninety days", "90 days"]
+  source: "DPA s.56(5)"
+  note: "PARAPHRASE of s03. Expected MISS until Session 04."
+
+- id: p03
+  question: >-
+    What is the largest money penalty the privacy regulator can hand down
+    without going to court?
+  answer: "Up to five million shillings, or 1% of annual turnover — whichever is lower"
+  expect: ["one per centum", "one per cent"]
+  source: "DPA s.63"
+  note: >-
+    PARAPHRASE of s04. "without going to court" is the distinction between an
+    administrative fine (s.63) and a criminal one (s.73) — a human reads that
+    instantly and a keyword index cannot see it at all.
+
+- id: p04
+  question: >-
+    Can a person refuse to let a computer decide something important about
+    them on its own?
+  answer: "Yes — a right not to be subject to a decision based solely on automated processing"
+  expect: ["solely on automated processing"]
+  source: "DPA s.35(1)"
+  note: >-
+    PARAPHRASE. Also the statutory basis for the human-in-the-loop checkpoint
+    built in Session 07, so this question is worth carrying all quarter.
