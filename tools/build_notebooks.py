@@ -47,8 +47,14 @@ def build(lab: Path, branch: str) -> Path:
 
     target = OUT / f"{lab.parent.name}.ipynb"
     try:
+        # WHY sys.executable -m rather than a bare "jupytext": the console script
+        # lives in .venv/Scripts (or .venv/bin) and is only on PATH once the venv is
+        # activated. Someone replaying a session alone who ran the interpreter by its
+        # full path has jupytext installed and importable, and would still be told it
+        # was missing. Invoking the module uses the interpreter already running.
         subprocess.run(
-            ["jupytext", "--to", "notebook", "--output", str(target), str(staged)],
+            [sys.executable, "-m", "jupytext",
+             "--to", "notebook", "--output", str(target), str(staged)],
             check=True,
         )
     except FileNotFoundError:

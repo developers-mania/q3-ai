@@ -179,6 +179,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Session 01 · the naive pipeline")
     parser.add_argument("--score", action="store_true", help="run the evaluation set")
     parser.add_argument("--ask", metavar="QUESTION", help="retrieve against one question")
+    # WHY a path rather than a hardcoded file: eval/questions.yaml is the ROOM's set
+    # and is empty until 3:40, which leaves anyone working through this alone with no
+    # number and therefore no session. eval/seed-questions.yaml is the self-study
+    # fallback. Kept as an explicit flag rather than an automatic fallback so that a
+    # seed score can never be mistaken for the cohort baseline.
+    parser.add_argument("--questions", metavar="PATH", type=Path, default=QUESTIONS,
+                        help="question set to score (default: eval/questions.yaml)")
     args = parser.parse_args()
 
     docs = load_documents()
@@ -199,13 +206,25 @@ def main() -> int:
             print(f"  {c['text'][:300]}...\n")
 
     if args.score:
-        questions = yaml.safe_load(QUESTIONS.read_text()) or []
+        if not args.questions.exists():
+            print(f"\nNo such question set: {args.questions}")
+            return 1
+        questions = yaml.safe_load(args.questions.read_text(encoding="utf-8")) or []
         if not questions:
-            print("\neval/questions.yaml is empty. That is expected until 3:40.")
+            print(f"\n{args.questions.name} is empty. That is expected until 3:40 — it is"
+                  "\nthe room's twenty questions and it is deliberately not pre-filled."
+                  "\n\nWorking through this alone? Score against the seed set instead:"
+                  "\n    python -m src.pipeline --score --questions eval/seed-questions.yaml")
             return 0
         print()
         accuracy = score(questions, chunks, vectorizer, matrix)
-        print(f"\nBASELINE RETRIEVAL ACCURACY: {accuracy:.0%}  ({len(questions)} questions)")
+        seed = args.questions.name != QUESTIONS.name
+        label = "SEED SET RETRIEVAL ACCURACY" if seed else "BASELINE RETRIEVAL ACCURACY"
+        print(f"\n{label}: {accuracy:.0%}  ({len(questions)} questions)")
+        if seed:
+            # WHY say this every run: a number that looks like the baseline and is not
+            # will end up in eval/baseline.md within a week if nothing objects.
+            print("Not the cohort baseline — that is scored against eval/questions.yaml.")
 
     return 0
 

@@ -117,9 +117,23 @@ for q in pair:
 # %%
 import yaml  # noqa: E402
 
-questions = yaml.safe_load(Path("eval/questions.yaml").read_text()) or []
+# The room's set is empty until 3:40 on the day. Anyone replaying this alone falls
+# back to eval/seed-questions.yaml so that step 06 produces an actual number — a
+# session whose measurement step prints nothing has not been replayed at all.
+room = yaml.safe_load(Path("eval/questions.yaml").read_text(encoding="utf-8")) or []
+if room:
+    questions, source_file = room, "eval/questions.yaml"
+else:
+    questions = yaml.safe_load(
+        Path("eval/seed-questions.yaml").read_text(encoding="utf-8")
+    ) or []
+    source_file = "eval/seed-questions.yaml"
+    print("eval/questions.yaml is empty — that is the room's file, written at 3:40.")
+    print("Falling back to the seed set so this replay produces a number.\n")
+
+print(f"{len(questions)} questions from {source_file}\n")
 for q in questions:
-    print(f"{q['id']}  {q['answer']:<24} {q['source']:<18} expect={expected_strings(q)}")
+    print(f"{q['id']:<5} {q['answer'][:34]:<36} {q['source']:<18} expect={expected_strings(q)}")
 
 # %% [markdown]
 # ## 06 · Run it and record the number
@@ -130,7 +144,11 @@ for q in questions:
 # %%
 if questions:
     accuracy = score(questions, chunks, vectorizer, matrix)
-    print(f"\nBASELINE RETRIEVAL ACCURACY: {accuracy:.0%}  ({len(questions)} questions)")
+    print(f"\nRETRIEVAL ACCURACY: {accuracy:.0%}  ({len(questions)} questions"
+          f" from {source_file})")
+    if source_file.endswith("seed-questions.yaml"):
+        print("Expect 47%. This is a learning score, NOT the cohort baseline —")
+        print("eval/baseline.md is scored against the room's eval/questions.yaml.")
 
 # %% [markdown]
 # Write it on the board. Photograph the board. Commit it to `eval/baseline.md` with
@@ -139,7 +157,34 @@ if questions:
 # Expect 30–55%. **If it comes out above 70%, the questions were too easy** — say so
 # honestly and harden them before committing. A flattering baseline is worse than no
 # baseline, because every improvement for the next nine weeks is measured against it.
+
+# %% [markdown]
+# ## Read the misses, not the number
 #
+# The number on its own teaches nothing. **Which** questions failed is the syllabus.
+#
+# On the seed set, the four `p0*` questions fail together. They ask the same things
+# as `s01`, `s03`, `s04` and s.35 — but in the words an ordinary person would use:
+# *regulator* not *Data Commissioner*, *leak* not *personal data breach*. The answers
+# are provably in the corpus. TF-IDF cannot find them, because "notify the
+# Commissioner" and "tell the regulator" share no terms and score near zero against
+# each other.
+#
+# > That is **Flaw 2 — the index matches words, not meaning.** Owner: Session 04.
+#
+# Re-run exactly those four when Session 04 replaces the index with embeddings. If
+# they do not become HITs, the embeddings are not earning their cost.
+
+# %%
+for q in questions:
+    if q["id"].startswith("p"):
+        print(f"{q['id']}  {q['question'][:66]}")
+        for c, s in retrieve(q["question"], chunks, vectorizer, matrix)[:1]:
+            print(f"      top hit [{s:.3f}] {c['source']} #{c['index']} — "
+                  f"{'contains' if any(e.lower() in c['text'].lower() for e in expected_strings(q)) else 'does NOT contain'}"
+                  " the answer\n")
+
+# %% [markdown]
 # ---
 #
 # **Measure first. Improve second. Never the other way round.**
