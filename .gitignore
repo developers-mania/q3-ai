@@ -18,3 +18,5 @@ notebooks/
 # Facilitator inputs, not the frozen artifact. The .txt in corpus/ is what ships;
 # these are the PDFs it was converted from, and they are large.
 sources/
+docs/guides/*.docx
+docs/guides/*.pdf

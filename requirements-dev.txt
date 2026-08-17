@@ -9,3 +9,4 @@
 jupytext==1.16.4       # sessions/sNN/lab.py  ->  notebooks/sNN.ipynb (Colab)
 python-docx==1.1.2     # tools/prepare_corpus.py — .docx sources
 pdfplumber==0.11.4     # tools/prepare_corpus.py — .pdf fallback where poppler is absent
+pymupdf==1.28.2        # tools/pdf2corpus.py — column-aware PDF extraction

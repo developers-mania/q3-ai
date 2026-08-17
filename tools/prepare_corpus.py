@@ -59,10 +59,19 @@ LANDMARKS: dict[str, list[str]] = {
         "Data Commissioner",
     ],
     "ai-strategy-2025": [
-        "pillars",
-        "enablers",
+        "three key pillars",     # the anchor sentence — see the note below
+        "four enablers",         # s.1 overview; also appears in the Egypt comparison
+        "cross-cutting enablers",
     ],
 }
+
+# WHY these are phrases and not the bare words "pillars" and "enablers":
+# a bare word survives ANY extraction, including one that interleaves a two-column
+# layout line by line. The Strategy's own sentence — "anchored by three key pillars
+# and supported by four enablers" — does not: column interleaving wedges an unrelated
+# sentence between "three" and "key", and the phrase stops existing. An earlier
+# conversion passed this report on the bare words while the phrase was destroyed.
+# A landmark must be long enough to break when the extraction breaks.
 
 SECTION_RE = re.compile(r"^\s*(\d{1,3})\.\s", re.MULTILINE)
 
@@ -170,6 +179,28 @@ def find_page_furniture(text: str, threshold: int = 5) -> list[tuple[str, int]]:
     return [(ln, n) for ln, n in candidates.most_common(8) if n >= threshold]
 
 
+def find_interleaved_columns(text: str, threshold: float = 0.08):
+    """Detect a two-column PDF flattened into side-by-side lines.
+
+    `pdftotext -layout` preserves columns *visually*: each output line holds the
+    left column, a run of spaces, then the facing column. It reads fine on screen
+    and is unusable as prose, because consecutive lines of one column are no longer
+    consecutive in the text. This is the failure that silently destroyed the AI
+    Strategy — and it is invisible to a landmark check written in single words.
+
+    Returns (share_of_lines, a_sample_line), or None if the text looks clean.
+    """
+    lines = [ln.rstrip() for ln in text.split("\n") if ln.strip()]
+    if len(lines) < 50:
+        return None
+    # Text, a gutter of 5+ spaces, then more text — with the gutter far enough in
+    # that an indented statutory subsection like "   (a) notify ..." cannot match.
+    gutter = re.compile(r"^.{40,}?\S {5,}\S")
+    hits = [ln for ln in lines if len(ln) > 60 and gutter.match(ln)]
+    share = len(hits) / len(lines)
+    return (share, hits[0]) if share >= threshold else None
+
+
 def report(name: str, text: str) -> bool:
     print(f"\n{'=' * 66}\n{name}.txt\n{'=' * 66}")
     print(f"  characters          {len(text):>10,}")
@@ -190,6 +221,18 @@ def report(name: str, text: str) -> bool:
         print("  Session 03 recovers section boundaries from this text. If they are")
         print("  not here, that session has nothing to work with. Try a different")
         print("  source (a DOCX if you have one) before accepting this.")
+        ok = False
+
+    interleaved = find_interleaved_columns(text)
+    if interleaved:
+        share, sample = interleaved
+        print(f"\n  COLUMN WARNING — {share:.0%} of lines look like two columns "
+              "printed side by side.")
+        print("  Every such line splices unrelated text from the facing column into")
+        print("  the middle of a sentence, so phrases that span a line break stop")
+        print("  existing and `expect` strings score MISS on a perfect retrieval.")
+        print(f"    {sample[:88]!r}")
+        print("  Re-extract with tools/pdf2corpus.py, which orders columns properly.")
         ok = False
 
     furniture = find_page_furniture(text)

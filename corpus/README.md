@@ -31,17 +31,38 @@ python tools/prepare_corpus.py sources/dpa.docx --name dpa-2019
 python tools/prepare_corpus.py --check-only        # re-report on corpus/*.txt
 ```
 
-What was actually run for the committed text, on 12 August 2026 — only PDFs were
-available, and `pdftotext -layout` came from Git for Windows rather than a poppler
-install:
+### Two tools, and when to use which
+
+| Tool | Job |
+|---|---|
+| `tools/pdf2corpus.py` | **Extraction.** Orders two-column pages into real reading order, strips running headers, de-hyphenates. Needed whenever the source is a multi-column PDF. |
+| `tools/prepare_corpus.py` | **Normalisation and the report.** NFKC, straight quotes, LF endings, then the checks that say whether the conversion is usable. Always run last — it is what writes into `corpus/`. |
+
+A single-column source needs only the second. A two-column source needs both, in
+order:
 
 ```bash
-python tools/prepare_corpus.py "sources/Data Protection Act.pdf" --name dpa-2019
-python tools/prepare_corpus.py "sources/Kenya AI Strategy 2025 - 2030.pdf" --name ai-strategy-2025
+python tools/pdf2corpus.py sources/Strategy.pdf -o /tmp/conv       # de-column
+python tools/prepare_corpus.py /tmp/conv/Strategy.txt --name ai-strategy-2025
 ```
 
-All 75 sections of the Act survived, so the PDF cost nothing here. `sources/` is
-gitignored: the committed `.txt` is the artifact, and the PDFs are 23 MB.
+What was actually run for the committed text:
+
+```bash
+# dpa-2019.txt — 12 August 2026. Single column; pdftotext -layout was enough.
+python tools/prepare_corpus.py "sources/DataProtectionAct.pdf" --name dpa-2019
+
+# ai-strategy-2025.txt — re-extracted 17 August 2026, see docs/decisions.md.
+python tools/pdf2corpus.py "sources/KenyaAIStrategy.pdf" -o <scratch>
+python tools/prepare_corpus.py "<scratch>/KenyaAIStrategy.txt" --name ai-strategy-2025
+```
+
+All 75 sections of the Act survived, so the PDF cost nothing there. The Strategy is
+two-column and the first conversion did cost something — it flattened the columns
+into side-by-side lines, which destroyed every phrase spanning a line break. The
+report now catches that; see `find_interleaved_columns` in `tools/prepare_corpus.py`.
+
+`sources/` is gitignored: the committed `.txt` is the artifact, and the PDFs are 23 MB.
 
 **Prefer DOCX over PDF where both exist.** DOCX is structured XML, so section
 numbering arrives as text. PDF numbering is inferred from glyph positions and is
