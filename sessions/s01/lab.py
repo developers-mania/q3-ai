@@ -10,10 +10,41 @@
 # Nothing here needs an API key, an account, or a network connection.
 
 # %%
+import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path.cwd()))
+
+def repo_root() -> Path:
+    """Find the clone, from wherever this happens to be running.
+
+    WHY not Path.cwd(): a notebook's working directory is the folder the .ipynb
+    sits in — notebooks/ — not the repository root. `import src.pipeline` then
+    raises ModuleNotFoundError and every relative path like eval/questions.yaml
+    misses, while the identical file run as a script from the root works fine.
+    Walking up finds the clone from the root, from notebooks/, from sessions/s01/,
+    and in Colab once the bootstrap cell has cloned and changed directory.
+    """
+    for base in (Path.cwd(), *Path.cwd().parents):
+        if (base / "src" / "pipeline.py").exists() and (base / "corpus").is_dir():
+            return base
+    raise SystemExit(
+        f"Could not find the repository root from {Path.cwd()}.\n"
+        "Run this from a clone of q3-ai — the folder holding corpus/ and src/.\n"
+        "On session-01-start there is no src/pipeline.py yet: it is built live in\n"
+        "the session. Check out solution/session-01 to replay the finished lab."
+    )
+
+
+ROOT = repo_root()
+os.chdir(ROOT)                      # so eval/... below resolves the same way everywhere
+sys.path.insert(0, str(ROOT))
+
+# If the score below is not 47%, or an import fails, check these two lines first.
+# A notebook kernel is often a different interpreter from the shell's virtualenv,
+# and the usual symptom is ModuleNotFoundError for sklearn or yaml.
+print(f"repo root : {ROOT}")
+print(f"python    : {sys.executable}")
 
 from src.pipeline import (  # noqa: E402
     CHUNK_SIZE,
