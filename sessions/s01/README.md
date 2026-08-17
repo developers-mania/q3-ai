@@ -368,6 +368,8 @@ If you cannot answer these without looking, re-read the Study Guide.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `ModuleNotFoundError: No module named 'src'` **in the notebook** | A notebook's working directory is `notebooks/`, not the repo root | Rebuild it: `python tools/build_notebooks.py s01`. The lab finds the root itself as of 18 Aug |
+| `ModuleNotFoundError: sklearn` or `yaml` **in the notebook** | The kernel is a different interpreter from your shell's venv | The lab prints `python :` on its first cell. If that is not your `.venv`, switch the kernel, or `pip install -r requirements.txt` into whichever interpreter it names |
 | `ModuleNotFoundError: sklearn` | venv not active | `source .venv/bin/activate`, reinstall |
 | `python -m src.pipeline` → no module | You are on `session-01-start` | Correct. It is built live; use `solution/session-01` to see it finished |
 | `CHANGED` from `verify_corpus.py` | Corpus edited, or CRLF | `git checkout -- corpus/` and re-run |
