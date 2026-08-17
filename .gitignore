@@ -1,4 +1,6 @@
 .venv/
+# notebook environment
+.venv-1/  
 __pycache__/
 *.pyc
 .env
