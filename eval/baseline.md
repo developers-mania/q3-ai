@@ -7,6 +7,7 @@ measured against the first row of this table, not against the row above it.
 |---|---|---|---|---|---|
 | 2026-08-05 | 01 | _to be filled in the room_ | _to be filled in the room_ | not measurable | Baseline — fixed 500-char chunks, TF-IDF, top 3 |
 | 2026-08-12 | 02 | _to be filled in the room_ | _expected: roughly unchanged_ | _expected: poor_ | Manifest and provenance, structural parser, passage schema, quarantine |
+| 2026-08-19 | 03 | _to be filled in the room_ | _expected: up_ | _expected: up sharply_ | Structure-aware chunking, measured overlap, redaction with a false positive rate |
 
 > A flattering baseline is a failure. If the number comes out above 70%, the
 > questions were too easy — harden them before committing.

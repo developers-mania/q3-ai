@@ -9,255 +9,280 @@
 | **Date** | Wednesday 19 August 2026 · 2:00–4:00 PM |
 | **Module** | 1 · Data Infrastructure and Pipelines (**closing session**) |
 | **Stack layer** | 1 into 2 |
-| **Start branch** | `session-03-start` (= `solution/session-02` + a synthetic complaint fixture) |
+| **Start branch** | `session-03-start` |
 | **Finish tag** | `solution/session-03` |
-| **Needs** | Python 3.10+. `spacy` optional. Still no key, no account, no network |
-| **Repairs** | Flaw 1 (chunks cut across meaning); completes Flaw 5 (citation precision) |
+| **Needs** | Python 3.10+. `spacy` optional. Still **no key, no account, no network** |
+| **Repairs** | **Flaw 1** (chunks cut across meaning); completes **Flaw 5** (citation precision) |
 
 ---
 
 ## 1 · What this codelab is for
 
-This is the session the whole first half has been building toward, and it has two
-halves that teach opposite lessons.
+Two halves that teach opposite lessons.
 
 **First half — cutting on meaning.** Session 01 cut the corpus into 500-character
 pieces chosen for no reason at all. Session 02 built a parser that knows where every
-section begins and ends, but deliberately left the cutting alone. Today those meet.
-**This is expected to produce the largest single movement in the score of the entire
-quarter** — and it does so by doing *less*, not more. No new model, no new index.
-Just cutting where the document says to cut.
+subsection begins and ends, and deliberately left the cutting alone. Today they meet,
+and **citation accuracy goes from 8% to 38%** — by doing *less*, not more. No new
+model, no new index. Just cutting where the document says to cut.
 
 **Second half — the failure nobody expects.** The room adds a redaction step, does it
-competently, and **watches the score go down** — because a rule tuned for one kind of
-data destroyed another kind. Nothing errors. The pipeline reports success. Only the
-measurement notices.
+competently, and watches the numbers move the wrong way — because a rule written to
+protect people deleted the subject of half the evaluation set. Nothing errors. The
+pipeline reports success. **Only the measurement notices.**
 
-> Both halves matter. **The second is the one people remember.**
-
-### The two directions redaction fails
-
-| Direction | What happens | Who anticipates it |
-|---|---|---|
-| **Under-redaction** | Personal data reaches the index, and from there possibly a model provider abroad | Everybody |
-| **Over-redaction** | A pattern matching 7–8 digit numbers redacts `5000000` from s.63 — the maximum administrative fine — and the system can no longer answer a question it answered correctly on 5 August | Almost nobody |
-
-In *this* corpus — two public policy documents containing essentially no personal
-data — **over-redaction is the dangerous one.** Which is why this session does
-redaction last and re-runs the evaluation set immediately afterwards.
+> The chunk is the **smallest addressable unit in the entire system**. A chunk cut
+> through the middle of an answer cannot be repaired by a better embedding model, a
+> better re-ranker, or a better prompt — the information is not there. Session 05's
+> re-ranker cannot recover an answer destroyed in Session 01.
+>
+> **Chunking is the one decision that later sophistication cannot compensate for.**
 
 ---
 
-## 2 · Before you start
+## 2 · Working through this on your own
 
 ```bash
-git fetch && git checkout session-03-start
-source .venv/bin/activate
-pip install -r requirements.txt        # nothing new required this week
+git clone https://github.com/developers-mania/q3-ai.git && cd q3-ai
+git fetch --tags --force
+git switch -c play/your-name solution/session-03
 
-# Optional, for the named entity recognition demo only (~12 MB):
-pip install spacy && python -m spacy download en_core_web_sm
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-python tools/verify_corpus.py
-python -m src.ingest --verify          # manifest still clean?
-python -m src.evaluate                 # both numbers, unchanged from 12 August
+python sessions/s03/lab.py
 ```
 
-**Put both numbers on the board before anything is built.** This is the third week
-of re-running the evaluation set and the discipline should now be automatic.
+That last command is the whole session: the structure-aware cut, the overlap sweep,
+recall against the fixture, precision against the corpus, the naive rule doing its
+damage, and the recovery. About two minutes to run.
 
-> If someone asks why it is run before every session when nothing has changed — that
-> is the right question. The answer: you cannot attribute a movement to a change
-> unless you know the starting point was stable.
+> **Which branch?** `solution/session-03` to read or replay. `session-03-start` to
+> type it yourself — there `src/chunk.py` and `src/redact.py` do not exist yet.
+> `git diff session-03-start solution/session-03` is the lesson.
 
 ---
 
-## 3 · Where to look in the repository
+## 3 · Before you start (in the room)
+
+```bash
+git fetch --tags --force && git checkout session-03-start
+source .venv/bin/activate
+pip install -r requirements.txt
+
+python -m src.ingest --verify      # manifest still clean?
+python -m src.evaluate --questions eval/seed-questions.yaml
+```
+
+**Put both Session 02 numbers on the board before anything is built** — retrieval
+53%, citation 8%. Today moves both, and the second one moves sharply.
+
+> This is the third week of re-running the evaluation set and the discipline should
+> now be automatic. If someone asks why it runs when nothing has changed — that is
+> the right question, and the answer is that you cannot attribute a movement to a
+> change unless you know the starting point was stable.
+
+---
+
+## 4 · Where to look in the repository
 
 | File | What to do with it |
 |---|---|
 | **`src/chunk.py`** | **New.** Walks the Session 02 parse tree and cuts on it |
-| **`src/redact.py`** | **New.** Pattern redaction, and the false-positive measurement |
-| `fixtures/complaint-synthetic.txt` | A **fabricated** complaint with invented names, phone and ID numbers |
+| **`src/redact.py`** | **New.** Patterns, and the false-positive measurement |
+| `fixtures/complaint-synthetic.txt` | A **fabricated** complaint with planted identifiers |
+| `src/ingest.py` | Gains `--overlap` and `--redact` |
 | `src/parse.py` | Read it — today's chunker consumes its tree |
 | `docs/decisions.md` | Two decisions land here: the overlap value and the redaction policy |
-| `eval/questions.yaml` | Add two questions phrased in **your own words**, avoiding the Act's vocabulary |
 
-> **On the fixture:** it must be *obviously* synthetic — invented names, invalid ID
-> formats, phone numbers in unallocated ranges. Say so aloud when it is introduced. A
-> room learning about personal data should not be handed a file that could plausibly
-> contain any.
+> **The fixture is synthetic and must be introduced as such.** Invented names, an
+> invalid ID format, telephone numbers in unallocated ranges, and email addresses on
+> `example.com` — which RFC 2606 reserves precisely so it can never be a real
+> address. A room learning about personal data should not be handed a file that could
+> plausibly contain any.
 
 ---
 
-## 4 · The six steps
+## 5 · The six steps
 
 | Time | Step | Effect on the numbers |
 |---|---|---|
-| 3:00 – 3:14 | 1 · Structure-aware chunking | **Both up, citation sharply** |
-| 3:14 – 3:22 | 2 · Measure three overlap settings | Small; decides a parameter |
-| 3:22 – 3:30 | 3 · Pattern redaction on the fixture | None yet — fixture only |
-| 3:30 – 3:38 | **4 · Run redaction on the real corpus** | **Down. This is the lesson** |
-| 3:38 – 3:44 | 5 · Measure the false positive rate | Recovers most of the loss |
-| 3:44 – 3:50 | 6 · Named entities, and what remains | — |
+| 3:00 – 3:14 | 1 · Structure-aware chunking | **citation 8% → 38%** |
+| 3:14 – 3:22 | 2 · Measure three overlap settings | decides a parameter |
+| 3:22 – 3:30 | 3 · Pattern redaction on the fixture | none yet — fixture only |
+| 3:30 – 3:38 | **4 · Run redaction on the real corpus** | **down. This is the lesson** |
+| 3:38 – 3:44 | 5 · Measure the false positive rate | full recovery |
+| 3:44 – 3:50 | 6 · What a pattern structurally cannot do | — |
 
 ### Three cases the chunker must handle
 
 | Case | Example | Handling |
 |---|---|---|
 | Fits comfortably | s.43(3), one sentence | Emit as one chunk. The common case |
-| Too small | A one-line definition in s.2 | Emit anyway, or merge with siblings — **never across parents** |
-| **Too large** | s.25, the eight principles, running to pages | Subdivide **within** the unit; every piece keeps the parent citation |
+| Too small | a one-line definition in s.2 | Merge with siblings — **never across sections** |
+| **Too large** | s.25, the eight principles | Subdivide **within** the unit; every piece keeps the citation |
 
-The third is why structure-aware chunking is not simply "one chunk per section". A
-split s.25 produces three chunks all correctly cited `DPA s.25` — less precise than
-a subsection, and enormously better than three chunks cited to nothing.
+Never merging across sections is not fussiness: a merged chunk carries only one
+citation, so joining s.43(3) to s.44(1) would cite half its content wrongly — the
+exact failure Session 02 measured.
 
-> `MAX_CHARS` is a **ceiling, not a target.** In fixed-size chunking the size
-> parameter governs every chunk. Here it governs only the handful of oversized
-> sections — a much smaller and more predictable effect.
+> `MAX_CHARS` is a **ceiling, not a target**. In fixed-size chunking the size
+> parameter governs every chunk. Here most subsections are naturally short and never
+> approach it, so it only governs the handful of oversized sections — a much smaller
+> and more predictable effect, and it changes how you tune it.
 
 ---
 
-## 5 · How to know it worked
+## 6 · How to know it worked
 
-### ✅ 1 — The same chunk, read again, is now clean
-
-Before today, chunk 847 read:
-
-```
-citation: DPA s.43
-text: "...ays of the receipt of the notification. (3) A data processor shall
-notify the data controller without delay, within forty eight hours of becoming
-aware of a personal data breach. 44. (1) Where a data controller or data
-processor processes sensitive personal data, the data controlle..."
-```
-
-Three failures in five lines: it starts inside the word "days", it contains the end
-of s.43 **and** the beginning of s.44, and it is cited `DPA s.43` even though a
-question answered from its last sentence belongs to s.44 entirely.
-
-Print the chunk containing the 48-hour deadline now:
+### ✅ 1 — The passage Session 02 got wrong is now right
 
 ```bash
-python -m src.inspect --citation "DPA s.43(3)"
+python -m src.ingest --overlap 0 && python -m src.evaluate --questions eval/seed-questions.yaml
 ```
 
-It must be **exactly** subsection 43(3) — beginning at "A data processor shall
-notify", ending at the end of that subsection, cited `DPA s.43(3)`.
+The chunk containing the 48-hour deadline was tagged `DPA s.43(2)` last week. It is
+now **exactly `DPA s.43(3)`** — beginning at "A data processor shall notify" and
+ending at the end of that subsection.
 
-### ✅ 2 — Both numbers move, citation sharply
+| | Session 02 | Session 03 (overlap 0) |
+|---|---|---|
+| Retrieval | 53% | 47% |
+| **Citation** | **8%** | **38%** |
+
+The near-miss pair from Session 01 can be told apart **by citation** for the first
+time.
+
+### ✅ 2 — Overlap is chosen by measurement, not by default
 
 ```bash
-python -m src.evaluate
+for n in 0 50 100 200 300; do python -m src.ingest --overlap $n >/dev/null && \
+  python -m src.evaluate --questions eval/seed-questions.yaml --quiet; done
 ```
 
-| Measure | Expectation |
-|---|---|
-| Retrieval accuracy | Up — likely the largest single jump of the quarter |
-| **Citation accuracy** | **Up sharply** — this is the headline |
+| Overlap | Chunks | Retrieval | Citation |
+|---|---|---|---|
+| 0 | 558 | 47% | **38%** |
+| 50 | 564 | 53% | 31% |
+| **100** | **571** | **73%** | **31%** |
+| 200 | 587 | 80% | 31% |
+| 300 | 606 | 80% | 31% |
 
-Citation is the headline because the near-miss pair from Session 01 can now be told
-apart **by citation** for the first time.
+**Ask the room to predict first.** The expectation — stated in the Study Guide — is
+that overlap should matter *less* once cutting is semantic, because answers no longer
+straddle boundaries at random.
 
-### ✅ 3 — Overlap is chosen by measurement, not by default
+**The prediction is wrong here, and that is why it was measured.** Overlap buys a lot
+of retrieval and costs citation, and the mechanism is visible once stated: a chunk
+beginning with its neighbour's tail can match a query on **borrowed text**, so the
+answer is retrieved (retrieval up) from a chunk whose citation belongs to the passage
+next door (citation down).
 
-```bash
-python -m src.evaluate --overlap 0
-python -m src.evaluate --overlap 100
-python -m src.evaluate --overlap 300
-```
-
-| Overlap | Chunks | Retrieval | Citation | Verdict |
-|---|---|---|---|---|
-| 0 | | | | |
-| 100 | | | | |
-| 300 | | | | |
-
-**Ask the room to predict before running.** The likely finding: with chunks already
-cut on section boundaries, overlap buys much less than it did in Session 01, because
-answers no longer straddle boundaries at random. The right answer here may well be
-**zero**, which would have been clearly wrong two weeks ago.
+There is no setting that maximises both. **100 is the recorded choice** — the
+smallest value that moves *both* numbers above Session 02, with the corpus growing
+for nothing beyond 200. Recorded, with the trade, in `docs/decisions.md`.
 
 > A parameter chosen by measurement is a decision. A parameter chosen by default is
-> an accident that has not caused a problem yet. **Record the value and the reason in
-> `docs/decisions.md`.**
+> an accident that has not caused a problem yet.
 
-### ✅ 4 — Redaction catches everything in the fixture
-
-```bash
-python -m src.redact fixtures/complaint-synthetic.txt
-```
-
-```
-PHONE_KE   4
-EMAIL      3
-ID_KE      2
-→ all identifiers in the fixture removed
-```
-
-### ✅ 5 — And then breaks the real corpus, visibly
+### ✅ 3 — Recall: the fixture is cleaned
 
 ```bash
-python -m src.ingest --redact && python -m src.evaluate
+python -c "from pathlib import Path; from src.redact import *; print(redact(Path('fixtures/complaint-synthetic.txt').read_text(encoding='utf-8'), PATTERNS)[1])"
 ```
 
 ```
-redaction hits:  PHONE_KE 0   EMAIL 0   ID_KE 31
+{'PHONE_KE': 4, 'EMAIL': 4, 'ID_KE': 2}
 ```
 
-**Stop here and let the room work out what happened.** Zero phone numbers, zero
-emails, and thirty-one identity-number hits in two public policy documents that
-contain no national identity numbers whatsoever.
+Every planted identifier removed. This is the rate everyone measures.
 
-Ask: *what in a statute looks like a seven-to-eight-digit number?* Let them find it.
-Then print the affected passages and read one aloud. **At least one evaluation
-question that passed at 3:14 will now fail.**
+### ✅ 4 — Precision: and the corpus is destroyed
 
-The pipeline reported success. Every stage ran cleanly. The only thing that revealed
-the damage was the score.
+**This is the rate almost nobody measures.** The Act and the Strategy are public
+documents; the Data Commissioner is named by *office*, not by name. So on this
+corpus **every hit is a false positive by construction**, and the count *is* the
+damage.
 
-### ✅ 6 — The false positive rate is measured, and the narrowed rule recovers it
+| Pattern | Hits on corpus | FP rate |
+|---|---|---|
+| `PHONE_KE` | 0 | 0% |
+| `EMAIL` | 2 | 100% |
+| `ID_KE` (labelled) | 0 | 0% |
+| **`NAME_NAIVE`** | **739** | **100%** |
+| `NAME_NARROW` | 2 | 100% |
+
+**Stop here and let the room work out what happened.** The well-shaped patterns cost
+almost nothing. The naive two-capitalised-words name rule fires 739 times, and not
+one of them is a person:
+
+```
+  80x  Data Commissioner
+  40x  Data Protection
+  31x  The Data
+  16x  Flagship Projects
+  11x  Cabinet Secretary
+```
+
+`Data Commissioner` — 80 times in the Act alone, and the subject of most of the
+evaluation set. **A rule written to protect people is about to delete the subject of
+half the questions.**
+
+| | Retrieval | Citation |
+|---|---|---|
+| Before redaction | 73% | 31% |
+| **After the naive name rule** | **67%** | **23%** |
+
+The pipeline reported success. Every stage ran cleanly. The output looks well-formed.
+**Only the score noticed.** That is the third time this quarter measurement has caught
+something no test would have raised.
+
+> **A caution worth showing the room.** At `--overlap 0` the same destructive rule
+> makes retrieval go *up* (47% → 53%) while citation still falls. A change that
+> deletes 739 pieces of the corpus can move a metric the flattering way by accident.
+> This is exactly why you look at **which questions flipped**, not at the number.
+
+### ✅ 5 — Narrowing recovers everything
 
 ```python
-# Before: any 7-8 digit number
-ID_KE = r"\b\d{7,8}\b"
+# Before: any two capitalised words
+NAME_NAIVE  = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
 
-# After: require the context a real ID appears in
-ID_KE = r"(?i)\b(?:national\s+id|id\s+(?:no|number))\D{0,10}(\d{7,8})\b"
+# After: require the context a person is actually introduced in
+NAME_NARROW = r"\b(?:[Cc]omplainant|[Aa]pplicant|Mr|Mrs|Ms|Dr)\.?,?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})"
 ```
 
-Re-run both:
-
-| Target | Expected |
-|---|---|
-| The fixture | Identifiers **still caught** — they appear labelled, "National ID: 34820192" |
-| The corpus | Hits drop to **zero** |
-| The score | **Recovers to its 3:14 value** |
-
-The corpus gives an unusually clean measurement: it is known to contain no personal
-data, so **every hit is a false positive by construction.** Thirty-one hits means
-thirty-one pieces of statute destroyed for no compliance benefit.
-
-The narrowed rule genuinely catches less — an unlabelled ID now passes through. **That
-trade is the decision the room is making.** Record both rules and both measurements.
-
-### ✅ 7 — Recorded before the room empties
-
-| Stage | Retrieval | Citation |
+| | Retrieval | Citation |
 |---|---|---|
-| 5 Aug baseline | | n/a |
-| 12 Aug — ingestion | | |
-| 19 Aug — after chunking | | |
-| 19 Aug — after redaction | | |
-| 19 Aug — after narrowing | | |
+| No redaction | 73% | 31% |
+| Naive name rule | 67% | 23% |
+| **Narrowed rule** | **73%** | **31%** |
 
-Plus the overlap value and its reason, the redaction policy and its reason, and
-standard 3 of 10.
+**Full recovery**, and the narrowed rule still catches every planted name in the
+fixture. It genuinely catches *less* — an unlabelled name walks straight through —
+and **that trade is the decision the room is making**, not a detail.
+
+### ✅ 6 — Two findings the measurement produced that nobody predicted
+
+**A `(?i)` flag silently widened the pattern.** The narrowed rule was first written
+`r"(?i)\b(?:complainant|mr|dr)\.?,?\s+([A-Z][a-z]+...)"`. The inline flag applies to
+the *whole* pattern, so `[A-Z][a-z]+` matched lowercase too — and the phrase
+"applicant is false or" became a person named *"is false or"*. An inline flag
+quietly widening the half of a pattern you meant to keep strict is easy to ship and
+hard to see.
+
+**The corpus is not quite free of personal data.** The narrowed rule's two remaining
+hits are `Melissa Omino` and `Nyawira Gitahi` — real contributors credited in the
+Strategy's acknowledgements. So the premise of the precision measurement, *this
+corpus contains no personal data*, is **almost** true and not quite. The Act contains
+none. The Strategy names people.
+
+Nobody predicted that. The measurement found it.
 
 ---
 
-## 6 · The decision this room owns
+## 7 · The decision this room owns
 
 The narrowed rule catches fewer real identifiers. The broad rule destroys corpus
 content. **There is no setting that does neither**, and the choice depends on what
@@ -265,58 +290,60 @@ the corpus is.
 
 | Corpus kind | Correct rule | Why |
 |---|---|---|
-| Reference corpus of public documents | **Narrow** | Compliance risk near zero; content loss real and measurable |
-| Corpus containing user records | **Broad** | Content loss is an acceptable price for a real exposure |
+| Reference corpus of public documents | **narrow** | Compliance risk near zero; content loss real and measurable |
+| Corpus containing user records | **broad** | Content loss is an acceptable price for a real exposure |
 
 What is never correct is choosing without knowing which kind you have, or shipping
-either rule without measuring both rates. Record which this corpus is, which rule was
-chosen, and why. **In Session 09 the same question returns as a threshold decision,
-and this entry is what makes that conversation short.**
+either rule without measuring both rates. **In Session 09 the same question returns
+as a confidence threshold, and this entry is what makes that conversation short.**
 
 ---
 
-## 7 · What you should be able to explain afterwards
+## 8 · What you should be able to explain afterwards
 
 - Why a better embedding model, re-ranker or prompt **cannot** repair a bad chunk.
-  Chunking is the one decision later sophistication cannot compensate for.
-- Why this corpus takes structure-aware chunking — and why a Slack export would
-  correctly take recursive character splitting instead.
+- Why this corpus takes structure-aware chunking and the AI Strategy does not — and
+  why a Slack export would correctly take recursive character splitting.
 - The two error rates of a redaction rule, and why **precision** is the one almost
   nobody measures.
-- Why redaction runs at **ingestion** and not at query time. ("By design" in s.41 is
-  a *timing* requirement — a filter on results still leaves the identifiers in the
-  index, and the index is the copy that persists.)
+- Why redaction runs at **ingestion** and not at query time. *"By design"* in s.41 is
+  a timing requirement — a filter on results still leaves identifiers in the index,
+  and the index is the copy that persists.
 - The difference between *"we redact personal data"* and *"the index contains no
   personal data"* — and why only the first is defensible.
 
-> Named entity recognition over-redacts too: run it over the Act and it will redact
+> Named entity recognition over-redacts too: run it over the Act and it will take
 > "Kenya" as a location and possibly "Data Commissioner" as an organisation. Same
-> failure, arriving by a harder route — a regex can be read and narrowed in a minute;
-> a model's decision cannot be inspected at all.
+> failure, harder route — a regex can be read and narrowed in a minute; a model's
+> decision cannot be inspected at all. **The risk of a redaction step is proportional
+> to how little you have measured it, and a model-based step is harder to measure
+> than a rule, not easier.**
 
 ---
 
-## 8 · If it goes wrong
+## 9 · If it goes wrong
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Chunk count explodes | Every tiny definition emitted alone | Merge small siblings under the same parent |
 | Citation accuracy barely moves | Chunker still cutting by character | Confirm it walks the tree, not the string |
-| A chunk spans two sections | Subdivision lost the parent citation | Every piece inherits the parent's citation |
-| Score does **not** fall after redaction | Redaction not in the ingestion path | It must run before indexing, not on results |
-| `spacy` model download fails | No network | Skip step 6 — the point survives without the code |
+| A chunk spans two sections | Merging across parents | Merge only within a section |
+| Score changes in ways redaction cannot explain | Redacting *before* chunking shifts every parse offset | Redact the chunk text, not the text the offsets index into |
+| Redaction has no effect on the score | Applied to retrieval results, not ingestion | It must run before indexing — s.41 is a timing requirement |
+| A "person" called `is false or` | `(?i)` applied to the whole pattern | Scope the case-insensitivity to the trigger words only |
+| `spacy` download fails | No network | Skip step 6 — the point survives without the code |
 
 ---
 
-## 9 · Before Session 04
+## 10 · Before Session 04
 
-- Re-run the pipeline and confirm your chunk count matches the room's.
+- Re-run the pipeline and confirm your chunk count matches the room's (**571** at the
+  chosen overlap of 100).
 - Read **section 41** of the Act and identify the line in `src/redact.py` that
   responds to it.
 - **Add two evaluation questions phrased in your own words**, deliberately avoiding
-  the Act's vocabulary. These are the questions the keyword index will fail and
-  Session 04 should fix.
-- Bring one redaction rule from your own work, and an estimate of its false positive
+  the Act's vocabulary. These are the questions the keyword index fails and Session
+  04 should fix — the four `p0*` questions in the seed set still miss.
+- Bring one redaction rule from your own work and an estimate of its false positive
   rate. **If you cannot estimate it, that is the finding.**
 
 **Next:** [Session 04 · Giving Software Memory](../s04/README.md) — Module 1 closes.

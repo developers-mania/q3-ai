@@ -25,7 +25,7 @@ New here? Start with the [repository guide](../docs/repository-guide.md).
 |---|---|---|---|---|---|---|
 | 01 | 5 Aug | **What Changed** | 1, 2 | *creates* the flaws | ✅ `solution/session-01` | [→](s01/README.md) |
 | 02 | 12 Aug | **Where The Data Comes From** | 1 | Flaw 6, half of 5 | ✅ `solution/session-02` | [→](s02/README.md) |
-| 03 | 19 Aug | **Getting Data Ready** | 1→2 | Flaw 1 | — | [→](s03/README.md) |
+| 03 | 19 Aug | **Getting Data Ready** | 1→2 | Flaws 1, 5 | ✅ `solution/session-03` | [→](s03/README.md) |
 | 04 | 26 Aug | **Giving Software Memory** | 2 | Flaw 2 | — | [→](s04/README.md) |
 | 05 | 2 Sep | **Remembering The Right Thing** ◇ | 2 | Flaw 3 | — | [→](s05/README.md) |
 | 06 | 9 Sep | **Handing Over The Tools** | 4 | — | — | [→](s06/README.md) |

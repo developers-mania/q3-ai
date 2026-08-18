@@ -1,0 +1,62 @@
+SYNTHETIC TEST FIXTURE - NOT A REAL COMPLAINT
+=============================================
+
+Everything below is fabricated for Session 03 of Sprint26 Q3. The names are
+invented, the identity numbers use an invalid format, the telephone numbers sit in
+ranges the Communications Authority has not allocated, and the email addresses are
+on example.com, which RFC 2606 reserves precisely so that it can never be a real
+address. Nothing here describes a real person or a real complaint.
+
+WHY a fabricated file rather than a redacted real one: a room learning about
+personal data should not be handed a document that could plausibly contain any.
+Say this aloud when the fixture is introduced.
+
+---------------------------------------------------------------------------
+COMPLAINT TO THE DATA COMMISSIONER
+Lodged under section 56 of the Data Protection Act (Cap. 411C)
+Reference: SYNTH/2026/0001
+---------------------------------------------------------------------------
+
+1. Particulars of the complainant
+
+   The complainant, Wanjiru Kamau, of Post Office Box 000, Nakuru, states as
+   follows. The complainant may be contacted on 0712000000 or by electronic mail
+   at wanjiru.kamau@example.com.
+
+   National ID: 34820192
+   Alternative telephone: +254733000111
+
+2. Particulars of the respondent
+
+   The respondent is a data controller registered under Part III of the Act. The
+   respondent's data protection officer, Mr Otieno Achieng, may be contacted at
+   dpo@example.com or on 0700111222.
+
+3. Grounds of the complaint
+
+   The complainant states that on a date in March 2026 the respondent disclosed
+   the complainant's personal data, including the identity number recorded above
+   and the telephone number 0722333444, to a third party without consent.
+
+   The complainant further states that a second data subject, Ms Achieng Odhiambo,
+   whose national ID number is 29104847, was affected by the same disclosure, and
+   that she was notified only after fourteen days had passed.
+
+4. Relief sought
+
+   The complainant seeks a determination under section 56 of the Act and, if the
+   Data Commissioner sees fit, an enforcement notice under section 58.
+
+   Correspondence may be sent to wanjiru.kamau@example.com or to the advocate on
+   record at advocate@example.com.
+
+---------------------------------------------------------------------------
+Planted identifiers, for checking recall. Counts are deliberately written in
+words so that listing them here does not itself add matches to the tally:
+
+    telephone numbers   four, in Kenyan mobile format
+    email addresses     four, all on the reserved example.com domain
+    national ID numbers two, both LABELLED - which is what the narrowed pattern
+                        requires and the broad one does not
+    person names        three, each introduced by "complainant", "Mr" or "Ms"
+---------------------------------------------------------------------------

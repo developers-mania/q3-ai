@@ -10,3 +10,7 @@ session that earned it and may be amended by the room.
    knows where it came from, which version it is, and when it was retrieved — and any
    passage that cannot cite its own source does not reach an index.
 
+3. **(Session 03)** A safeguard is measured in both directions. Any rule that removes
+   data reports what it removed and what it removed wrongly, and no redaction step
+   ships without a false positive rate.
+
