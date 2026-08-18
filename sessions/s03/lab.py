@@ -66,8 +66,15 @@ def measure(overlap: int, redact_fn=None):
     return passages, evaluate(QUESTIONS, passages, vectorizer, matrix)
 
 
-print("Session 02 shipped: retrieval 53%, citation 8%")
-print("It cut every 500 characters and tagged each chunk with whichever")
+print("This lab measures against eval/seed-questions.yaml throughout, so every")
+print("number it prints is comparable with every other number it prints.")
+print("Session 02 on that same set: retrieval 53%, citation 8%.")
+print()
+print("The COHORT baseline is a different set - eval/questions.yaml, twenty questions")
+print("- recorded in eval/baseline.md. There Session 02 scored 50%/17% and Session 03")
+print("scores 45%/33%. Both instruments are honest. Mixing them is not.")
+print()
+print("Session 02 cut every 500 characters and tagged each chunk with whichever")
 print("subsection it happened to START in. The parser was fine. The cut was not.")
 
 # %% [markdown]
