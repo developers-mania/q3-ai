@@ -20,6 +20,40 @@ the parent of Session NN+1's scaffolding commit. Facilitators prep from the tag.
 tag is re-pointed at the corrected commit. A tag here means "the completed state of
 Session NN as it now stands", not "an immutable historical commit".
 
+Tags are **annotated**, not lightweight, for two reasons: `git push --follow-tags`
+ignores lightweight tags and would silently publish nothing, and an annotated tag
+carries a message — which is where the reason for a re-point gets recorded.
+
+### Publishing a tag
+
+`git push` does not push tags. Ever. It has to be explicit, and re-pointing one
+needs `--force` because the tag already exists on the remote:
+
+```bash
+git tag -a -f solution/session-02 -m "Session 02 complete — <what changed, and why if re-pointed>"
+git push -f origin solution/session-02
+```
+
+A `solution/` tag that was never pushed is the failure to watch for: every
+participant instruction that says "check out `solution/session-NN`" fails for
+everyone but you, and it fails at home where nobody can ask.
+
+```bash
+git ls-remote --tags origin      # what participants can actually see
+```
+
+### Re-pointing a tag people already have
+
+`git fetch` will **not** update an existing local tag, and reports nothing when it
+declines. Announce a re-point, and tell people to run:
+
+```bash
+git fetch --tags --force
+```
+
+Otherwise they keep the version they first cloned, bug included, and neither side
+finds out.
+
 ## Fix forward, never rebase
 
 Branches are published and cloned. Rebasing the chain breaks every clone.

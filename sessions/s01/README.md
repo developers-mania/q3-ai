@@ -58,7 +58,8 @@ This is the one thing that confuses people, so decide it first:
 
 ```bash
 git clone https://github.com/developers-mania/q3-ai.git && cd q3-ai
-git checkout solution/session-01
+git fetch --tags --force                            # solution/ tags move; see below
+git switch -c play/your-name solution/session-01    # a branch OF the tag, not the tag
 
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
@@ -66,6 +67,13 @@ pip install -r requirements.txt
 
 python tools/check_setup.py        # four OK lines
 ```
+
+> **Why `switch -c` and not `git checkout solution/session-01`.** Checking out a tag
+> leaves you on **no branch**, so anything you commit belongs to nothing and the next
+> checkout silently throws it away. Branching from the tag costs one flag and keeps
+> your work. And `--force` on the fetch is not optional: `solution/` tags get
+> re-pointed when an earlier session is fixed, and plain `git fetch` refuses to
+> update a tag you already have — without saying so.
 
 ### The whole session in one command
 
