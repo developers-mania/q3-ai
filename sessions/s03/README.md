@@ -136,6 +136,12 @@ exact failure Session 02 measured.
 
 ## 6 · How to know it worked
 
+> **Two instruments, never mixed.** Every number in this section is measured against
+> `eval/seed-questions.yaml`, so they are comparable with each other. The **cohort
+> baseline** is a different, larger set — `eval/questions.yaml`, twenty questions —
+> recorded in [`eval/baseline.md`](../../eval/baseline.md). On that set Session 03
+> scores **45% retrieval, 33% citation**, against Session 02's 50% and 17%.
+
 ### ✅ 1 — The passage Session 02 got wrong is now right
 
 ```bash
