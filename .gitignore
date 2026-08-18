@@ -9,7 +9,7 @@ __pycache__/
 # WHY not committed: .ipynb is JSON with embedded outputs and execution counts.
 # It diffs badly and merges worse, which would wreck the fix-forward rule in
 # CONTRIBUTING.md. The .py is the source of truth; the notebook is a build artifact.
-notebooks/
+notebooks/*
 
 # Nothing under corpus/ is ignored. The corpus is committed and frozen — see the
 # first non-negotiable in CLAUDE.md. Extraction is not deterministic across tools,
@@ -19,6 +19,6 @@ notebooks/
 
 # Facilitator inputs, not the frozen artifact. The .txt in corpus/ is what ships;
 # these are the PDFs it was converted from, and they are large.
-sources/
+sources/*
 docs/guides/*.docx
 docs/guides/*.pdf
