@@ -9,22 +9,30 @@ Every session has a codelab guide in `sessions/sNN/README.md` telling you what t
 check out, **where to look in the repository**, what the codelab aims to do, and
 **how to know it worked.**
 
+Sessions marked ✅ are built and tagged. To replay one on your own:
+
+```bash
+git fetch --tags --force
+git switch -c play/your-name solution/session-NN
+python sessions/sNN/lab.py
+```
+
 New here? Start with the [repository guide](../docs/repository-guide.md).
 
 ---
 
-| # | Date | Session | Layer | Repairs | Guide |
-|---|---|---|---|---|---|
-| 01 | 5 Aug | **What Changed** | 1, 2 | *creates* the flaws | [→](s01/README.md) |
-| 02 | 12 Aug | **Where The Data Comes From** | 1 | Flaws 5, 6 | [→](s02/README.md) |
-| 03 | 19 Aug | **Getting Data Ready** | 1→2 | Flaw 1 | [→](s03/README.md) |
-| 04 | 26 Aug | **Giving Software Memory** | 2 | Flaw 2 | [→](s04/README.md) |
-| 05 | 2 Sep | **Remembering The Right Thing** ◇ | 2 | Flaw 3 | [→](s05/README.md) |
-| 06 | 9 Sep | **Handing Over The Tools** | 4 | — | [→](s06/README.md) |
-| 07 | 16 Sep | **Letting Software Decide** | 3 | — | [→](s07/README.md) |
-| 08 | 23 Sep | **(open slot)** ◇ | tbd | — | [→](s08/README.md) |
-| 09 | 30 Sep | **Knowing It Works** | 5 | Flaw 4 | [→](s09/README.md) |
-| 10 | 7 Oct | **The Standard We Set** | 5 | — | [→](s10/README.md) |
+| # | Date | Session | Layer | Repairs | Built | Guide |
+|---|---|---|---|---|---|---|
+| 01 | 5 Aug | **What Changed** | 1, 2 | *creates* the flaws | ✅ `solution/session-01` | [→](s01/README.md) |
+| 02 | 12 Aug | **Where The Data Comes From** | 1 | Flaw 6, half of 5 | ✅ `solution/session-02` | [→](s02/README.md) |
+| 03 | 19 Aug | **Getting Data Ready** | 1→2 | Flaw 1 | — | [→](s03/README.md) |
+| 04 | 26 Aug | **Giving Software Memory** | 2 | Flaw 2 | — | [→](s04/README.md) |
+| 05 | 2 Sep | **Remembering The Right Thing** ◇ | 2 | Flaw 3 | — | [→](s05/README.md) |
+| 06 | 9 Sep | **Handing Over The Tools** | 4 | — | — | [→](s06/README.md) |
+| 07 | 16 Sep | **Letting Software Decide** | 3 | — | — | [→](s07/README.md) |
+| 08 | 23 Sep | **(open slot)** ◇ | tbd | — | — | [→](s08/README.md) |
+| 09 | 30 Sep | **Knowing It Works** | 5 | Flaw 4 | — | [→](s09/README.md) |
+| 10 | 7 Oct | **The Standard We Set** | 5 | — | — | [→](s10/README.md) |
 
 ◇ = open slot. Sessions 03, 05 and 08 have their topics chosen during the quarter,
 each with a fixed decision point: **Session 03's topic is set at Session 01,
