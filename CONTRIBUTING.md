@@ -24,6 +24,31 @@ Tags are **annotated**, not lightweight, for two reasons: `git push --follow-tag
 ignores lightweight tags and would silently publish nothing, and an annotated tag
 carries a message — which is where the reason for a re-point gets recorded.
 
+### A solution/ tag may be a reconstruction, not a commit main passed through
+
+`solution/session-01` and `solution/session-02` are **assembled** states: the current
+`session-NN-start` branch, plus the files the room builds live, committed on top.
+They are not ancestors of `main`.
+
+That is deliberate. When `eval/questions.yaml` was written in August, the earlier
+tags pointed at commits made before it existed, so anyone self-studying from them got
+an empty evaluation set. Re-pointing them at a reconstruction is what makes the tag
+mean what this file says it means — *the completed state of Session NN as it now
+stands*. Making them ancestors of `main` instead would have meant merging Session
+02's `src/ingest.py` into a `main` that has deliberately replaced it, which is a
+conflict with no correct resolution.
+
+Consequences worth knowing:
+
+- `git log main` will not show these tags. `git checkout`, `git fetch --tags` and
+  GitHub's tag list all work normally.
+- `git diff session-NN-start solution/session-NN` is still exactly the session's
+  lesson, which is the property that actually matters.
+- Rebuilding one is cheap: branch from `session-NN-start`, `git checkout` the
+  built-live files from the branch that holds them, commit, re-point the tag. Verify
+  by re-running the evaluation set — a reconstruction that does not reproduce its own
+  row in `eval/baseline.md` is wrong.
+
 ### Publishing a tag
 
 `git push` does not push tags. Ever. It has to be explicit, and re-pointing one
