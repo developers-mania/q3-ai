@@ -4,6 +4,33 @@
 # it grows, and it never shrinks. Changes go through pull requests like any other code.
 #
 # ---------------------------------------------------------------------------
+# PROVENANCE — read this before quoting any number that comes out of this file
+# ---------------------------------------------------------------------------
+# These twenty questions were written by the FACILITATOR on 19 August 2026, against
+# the corpus, and NOT by the room.
+#
+# The design says otherwise, and the reason is worth keeping: the person best placed
+# to write a good evaluation question is often the analyst who knows the domain, not
+# the engineer who knows the index, and a set the room wrote is a set the room owns.
+# Session 01 ran without the twenty questions being recorded, and they could not be
+# reconstructed afterwards.
+#
+# What that costs, stated plainly so October does not have to guess:
+#
+#   - The baseline measures a facilitator's judgement of what matters in the corpus,
+#     not the room's. Those are not the same instrument.
+#   - Questions written by the person who also built the pipeline carry a real risk
+#     of being questions the pipeline happens to answer. Some of that is mitigated
+#     below - see the paraphrase block, which is written to FAIL - but not all of it.
+#   - The set was written after Sessions 01-03 were built, so it has seen the system
+#     it measures. A set written on 5 August could not have.
+#
+# What to do about it: the room adds to it. The set grows and never shrinks, so every
+# question a participant contributes dilutes this problem permanently. Questions
+# contributed by the room should be marked `by: room` so the two can be told apart
+# when the quarter is reviewed.
+#
+# ---------------------------------------------------------------------------
 # SCHEMA
 # ---------------------------------------------------------------------------
 #   id        q01, q02, ... — stable forever. Never renumber; the id is how a
@@ -13,14 +40,32 @@
 #   expect    List of literal strings. The score is a HIT if any one of them
 #             appears in a retrieved chunk. This is what the machine matches on.
 #   source    Section citation. Anyone must be able to verify in ten seconds.
+#             Also what citation accuracy is scored against, so it must be precise
+#             to the subsection.
 #   note      Optional. Flag near-miss traps and their pair here.
+#   by        Optional. `room` for questions contributed by participants.
 #
-# WHY `answer` and `expect` are separate fields:
-#   Statutes spell numbers out in words. The Act says "seventy-two hours"; the
-#   answer a human writes on the board is "72 hours". A substring test on `answer`
-#   alone scores a MISS on a perfect retrieval — the baseline would read near 0%
-#   for a reason that has nothing to do with the pipeline. `expect` holds every
-#   surface form the corpus might actually use.
+# ---------------------------------------------------------------------------
+# THE `answer` / `expect` RULE
+# ---------------------------------------------------------------------------
+# Statutes spell numbers out. The Act says "seventy-two hours"; the answer a human
+# writes on the board is "72 hours". A substring test on `answer` alone scores a MISS
+# on a perfect retrieval.
+#
+# EVERY `expect` STRING BELOW WAS GREPPED FROM corpus/ AND OCCURS EXACTLY ONCE.
+# Never write one from the canonical publication. Check first:
+#
+#     grep -in "seven days" corpus/dpa-2019.txt
+#
+# Several are longer than the answer on purpose. The scorer asks "did any expected
+# string appear in a retrieved chunk", so a phrase occurring in several places can
+# score a HIT off the WRONG passage. Counted across this corpus:
+#
+#     "three months"      3x   (ss.68(1), 70(1) AND 70(2) - three different periods)
+#     "twenty-one days"   2x   (s.6(3) the Commission, s.58(2)(c) an enforcement notice)
+#
+# Where a short form is ambiguous the longer unique form is used. A question that
+# scores HIT for the wrong reason is worse than one that scores MISS.
 #
 # ---------------------------------------------------------------------------
 # THE RULES FOR A QUESTION
@@ -33,24 +78,211 @@
 #   4. Some questions must be NEAR-MISS TRAPS — worded closely to a different
 #      answer elsewhere in the corpus. Without these the set flatters you.
 #
+# This set deliberately avoids the sections used by eval/seed-questions.yaml, so the
+# two measure different parts of the corpus and the baseline is not simply the seed
+# score under another name.
 # ---------------------------------------------------------------------------
-# EXAMPLE — commented out. The set is the room's work, not the facilitator's.
-# ---------------------------------------------------------------------------
-# - id: q01
-#   question: >-
-#     Within how many hours must a data controller notify the Data
-#     Commissioner of a personal data breach?
-#   answer: "72 hours"
-#   expect: ["seventy-two hours", "seventy two hours", "72 hours"]
-#   source: "DPA s.43(1)(a)"
-#
-# - id: q02
-#   question: >-
-#     Within how many hours must a data processor notify the data
-#     controller of a personal data breach?
-#   answer: "48 hours"
-#   expect: ["forty-eight hours", "forty eight hours", "48 hours"]
-#   source: "DPA s.43(3)"
-#   note: "near-miss trap for q01 — shares every content word but two role names"
 
-[]
+# --- The appointment of the Data Commissioner: two periods, one section ---
+
+- id: q01
+  question: >-
+    Within how many days of being notified of a vacancy must the Public Service
+    Commission invite applications for the office of Data Commissioner?
+  answer: "7 days"
+  expect: ["within seven days"]
+  source: "DPA s.6(2)"
+
+- id: q02
+  question: >-
+    Within how many days of receiving applications must the Public Service
+    Commission act on them?
+  answer: "21 days"
+  expect: ["within twenty-one days of receipt of applications"]
+  source: "DPA s.6(3)"
+  note: >-
+    NEAR-MISS TRAP, two ways. It pairs with q01 inside the same section, and
+    "twenty-one days" alone also matches s.58(2)(c), the minimum period an
+    enforcement notice must allow — a different answer entirely. The expect string
+    is the long form for that reason.
+
+- id: q03
+  question: >-
+    For what term of imprisonment does a conviction disqualify a person from
+    holding the office of Data Commissioner?
+  answer: "A term exceeding six months without the option of a fine"
+  expect: ["exceeding six months without the option of a fine"]
+  source: "DPA s.11(c)"
+
+# --- The three-month family: three different periods, near-identical wording ---
+
+- id: q04
+  question: >-
+    How far ahead of the new budget year does the Office have to draw up what it
+    expects to take in and spend?
+  answer: "At least 3 months before"
+  expect: ["at least three months before the commencement"]
+  source: "DPA s.68(1)"
+  note: >-
+    NEAR-MISS FAMILY with q05 and q06. "three months" appears three times in the
+    Act and means something different each time.
+
+- id: q05
+  question: >-
+    Within what period after the end of a financial year must the Data
+    Commissioner submit a report of the Office's operations?
+  answer: "Within 3 months after the end of the financial year"
+  expect: ["within three months after the end of each financial year"]
+  source: "DPA s.70(1)"
+  note: "NEAR-MISS with q04 and q06."
+
+- id: q06
+  question: >-
+    Within what period of receiving it must the Cabinet Secretary lay the annual
+    report before the National Assembly?
+  answer: "Within 3 months of receipt"
+  expect: ["within three months of receipt of the report"]
+  source: "DPA s.70(2)"
+  note: >-
+    NEAR-MISS with q04 and q05, and the hardest of the three — it shares a section
+    with q05 and differs only in who acts and from when the clock runs.
+
+# --- Obligations, rights and transfers ---
+
+- id: q07
+  question: >-
+    On what grounds may the Cabinet Secretary require certain processing to happen
+    only through a server or data centre located in Kenya?
+  answer: "Strategic interests of the state, or protection of revenue"
+  expect: ["a data centre located in Kenya"]
+  source: "DPA s.50"
+  note: >-
+    The data sovereignty thread. This is the section that makes Session 08's local
+    inference an engineering constraint rather than a preference.
+
+- id: q08
+  question: >-
+    What order may the Data Commissioner apply to a court for where personal data
+    is vulnerable to loss or modification?
+  answer: "A preservation order"
+  expect: ["preservation order for the expeditious preservation"]
+  source: "DPA s.66"
+
+- id: q09
+  question: >-
+    How does the regulator satisfy itself, on an ongoing basis, that firms are
+    actually following the law?
+  answer: "Periodical audits"
+  expect: ["periodical audits"]
+  source: "DPA s.23"
+
+- id: q10
+  question: What right does a data subject have in respect of false or misleading data?
+  answer: "Correction and deletion of false or misleading data"
+  expect: ["deletion of false or misleading data"]
+  source: "DPA s.26(e)"
+
+- id: q11
+  question: >-
+    Under the data protection principles, for what kind of purposes must personal
+    data be collected?
+  answer: "Explicit, specified and legitimate purposes, and not further processed incompatibly"
+  expect: ["explicit, specified and legitimate purposes"]
+  source: "DPA s.25(c)"
+  note: >-
+    Purpose limitation — the principle that makes indexing a document for
+    open-ended question answering a decision that needs justifying.
+
+- id: q12
+  question: >-
+    On what basis relating to the data subject's own agreement may personal data
+    be processed?
+  answer: "The data subject consents to the processing for one or more specified purposes"
+  expect: ["consents to the processing for one or more specified purposes"]
+  source: "DPA s.30(1)(a)"
+
+- id: q13
+  question: >-
+    What has to be demonstrated to the regulator before someone's records may be
+    sent abroad?
+  answer: "Proof of appropriate safeguards for the security and protection of the data"
+  expect: ["proof to the Data Commissioner on the appropriate safeguards"]
+  source: "DPA s.48(a)"
+
+# --- The National AI Strategy ---
+
+- id: q14
+  question: What kind of implementation approach does the National AI Strategy propose?
+  answer: "A phased approach"
+  expect: ["phased approach"]
+  source: "AI Strategy — implementation"
+
+- id: q15
+  question: >-
+    What does the National AI Strategy's third pillar aim to make Kenya, in AI
+    model development?
+  answer: "A global leader in AI model development"
+  expect: ["a global leader in AI model development"]
+  source: "AI Strategy — pillar 3"
+
+# ---------------------------------------------------------------------------
+# PARAPHRASE QUESTIONS — written to FAIL until Session 04
+# ---------------------------------------------------------------------------
+# Every question above uses the Act's own vocabulary, which is exactly what a
+# keyword index is good at. A set built only from those flatters the pipeline and
+# hides the flaw the quarter exists to fix.
+#
+# These five ask the same things in the words an ordinary person would use. The
+# answers are in the corpus and verified. They are EXPECTED TO MISS on 5 August, and
+# they are the first thing to re-run when Session 04 replaces the index with
+# embeddings. If they do not turn into HITs, the embeddings are not earning their
+# cost.
+#
+# They also part-answer the provenance problem above: a question written to fail
+# cannot be a question chosen because the pipeline happens to answer it.
+# ---------------------------------------------------------------------------
+
+- id: q16
+  question: >-
+    Can the government insist that some information about Kenyans is kept on
+    machines physically inside the country?
+  answer: "Yes — processing may be required to happen through a server or data centre located in Kenya"
+  expect: ["a data centre located in Kenya"]
+  source: "DPA s.50"
+  note: "PARAPHRASE of q07. Expected MISS until Session 04."
+
+- id: q17
+  question: >-
+    How soon after the books close must the privacy watchdog account for what it
+    has been doing?
+  answer: "Within 3 months after the end of the financial year"
+  expect: ["within three months after the end of each financial year"]
+  source: "DPA s.70(1)"
+  note: "PARAPHRASE of q05. Expected MISS until Session 04."
+
+- id: q18
+  question: >-
+    If a company holds something untrue about me, what can I demand they do with
+    it?
+  answer: "Correct it, and delete it"
+  expect: ["deletion of false or misleading data"]
+  source: "DPA s.26(e)"
+  note: "PARAPHRASE of q10. Expected MISS until Session 04."
+
+- id: q19
+  question: >-
+    What can the regulator do if it fears records are about to be destroyed before
+    anyone can look at them?
+  answer: "Apply to a court for a preservation order"
+  expect: ["preservation order for the expeditious preservation"]
+  source: "DPA s.66"
+  note: "PARAPHRASE of q08. Expected MISS until Session 04."
+
+- id: q20
+  question: >-
+    Can the regulator turn up and inspect how a firm actually handles the data it
+    holds?
+  answer: "Yes — it may carry out periodical audits"
+  expect: ["periodical audits"]
+  source: "DPA s.23"
+  note: "PARAPHRASE of q09. Expected MISS until Session 04."
