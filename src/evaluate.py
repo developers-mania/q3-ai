@@ -133,8 +133,11 @@ def main() -> int:
     print(f"{tag} CITATION  ACCURACY: {result['citation']:.0%}  "
           f"({result['citable_n']} citable questions"
           + (f"; {skipped} excluded — the AI Strategy has no citable sections" if skipped else "") + ")")
-    print(f"           {result['near']} more retrieved the right SECTION but the wrong subsection —")
-    print("           the parser is fine; the 500-character cut is not. That is Session 03.")
+    if result["near"]:
+        print(f"           {result['near']} more retrieved the right SECTION but the wrong")
+        print("           subsection. Until Session 03 that was the fixed-width cut straddling")
+        print("           a boundary; after it, the usual cause is a chunk matching on text")
+        print("           borrowed from its neighbour through overlap.")
     if seed:
         print("Not the cohort baseline — that is scored against eval/questions.yaml.")
     return 0
