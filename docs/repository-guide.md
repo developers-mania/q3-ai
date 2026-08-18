@@ -114,6 +114,50 @@ session-01-start ──► solution/session-01 ─┐
 06, the tag is re-pointed at the corrected commit. A tag here means "the completed
 state of Session NN as it now stands", not "an immutable historical commit".
 
+### Because they move, you have to ask for updates
+
+`git pull` will **not** update a tag you already have. Git refuses to overwrite an
+existing local tag, and it says nothing when it declines. Clone in August, and you
+keep August's `solution/session-02` forever — including the bug that was fixed in
+September.
+
+So refresh tags explicitly before each session:
+
+```bash
+git fetch --tags --force
+```
+
+That one flag is the difference between studying the corrected code and studying a
+bug the facilitator believes they fixed weeks ago.
+
+### Checking out a tag detaches HEAD — branch from it instead
+
+`git checkout solution/session-01` works, but it leaves you on **no branch**. Any
+commit you make there belongs to nothing, and the next `git checkout` silently
+orphans it. It looks like a safe sandbox and it is closer to a scratch pad that
+throws your work away.
+
+If you only want to *read* the code, a detached checkout is fine. If you intend to
+change anything — and you should, that is the point — start a branch from the tag:
+
+```bash
+git switch -c play/your-name solution/session-01
+```
+
+Now your work has a name and cannot be lost. To experiment without disturbing your
+main clone at all, use a second working directory sharing the same history:
+
+```bash
+git worktree add ../q3-play solution/session-01
+# ... break things freely ...
+git worktree remove ../q3-play
+```
+
+> Nothing you do locally can damage the shared repository unless you have push
+> access to it. That — not the detached HEAD — is what actually makes experimenting
+> safe. Untracked and ignored files (`.venv/`, `notebooks/`, `sources/`) are never
+> swapped by a checkout, so they follow you across every branch switch.
+
 ### Fix forward, never rebase
 
 Branches are published and cloned. Rebasing breaks every clone. When a bug in an
@@ -196,7 +240,8 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # Before every session
-git fetch && git checkout session-NN-start
+git fetch --tags --force           # --force, or moved solution/ tags never reach you
+git checkout session-NN-start
 python tools/check_setup.py        # four OK lines
 python tools/verify_corpus.py      # the corpus pin still holds
 
