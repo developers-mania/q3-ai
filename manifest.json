@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Provenance for every source in corpus/. Session 02, Layer 1.",
+    "A hash tells you THAT something changed. The version field tells you what it",
+    "changed FROM, which is the difference between an alert and a diagnosis.",
+    "corpus/MANIFEST.sha256 pins the bytes; this file records where they came from.",
+    "There is deliberately no raw/ copy of the corpus - see docs/decisions.md."
+  ],
+  "sources": {
+    "dpa-2019.txt": {
+      "title": "Kenya Data Protection Act, Cap. 411C (No. 24 of 2019)",
+      "publisher": "Kenya Law - new.kenyalaw.org",
+      "version": "as revised 31 December 2022",
+      "retrieved": "2026-08-12",
+      "licence": "Public domain (legislative content, Kenya Law)",
+      "sha256": "134c2205094ea8c7e0d29f060f82efc6bc46ad103e3212ebc8a168da729b1b17"
+    },
+    "ai-strategy-2025.txt": {
+      "title": "Kenya National Artificial Intelligence Strategy 2025-2030",
+      "publisher": "Ministry of Information, Communications and the Digital Economy",
+      "version": "launched March 2025; re-extracted 2026-08-17",
+      "retrieved": "2026-08-17",
+      "licence": "Public policy document",
+      "sha256": "379b4dd62fbf02996a2579a8fe89b3b9c41b2716c5cc9d107b48022eb374815e"
+    }
+  }
+}
