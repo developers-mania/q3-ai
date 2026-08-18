@@ -31,7 +31,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from src.parse import anchors, citation_at, parse_act, parse_strategy
+from src.chunk import chunk_flat, chunk_tree
+from src.parse import parse_act, parse_strategy
 from src.passage import passage_id
 from src.publish import publish
 
@@ -40,7 +41,7 @@ CORPUS = ROOT / "corpus"
 MANIFEST = ROOT / "manifest.json"
 PASSAGES = ROOT / "passages.jsonl"
 
-CHUNK_SIZE = 500  # characters — UNCHANGED from Session 01, deliberately. See below.
+CHUNK_SIZE = 500  # Session 01/02 only. Session 03 cuts on the tree — see src/chunk.py.
 
 # WHY chunking stays naive this week: cutting on section boundaries is Session 03's
 # job, and separating the two is what makes next week's improvement measurable in
@@ -93,29 +94,52 @@ def stamp() -> None:
     print("are not comparable to scores after it.")
 
 
-def build_candidates() -> list[dict]:
-    """Cut each source into fixed-width passages, each carrying its citation."""
+def build_candidates(overlap: int = 100, redact_fn=None) -> list[dict]:
+    """Cut each source on its own boundaries, and give every passage its citation.
+
+    Session 02 cut every 500 characters and tagged each chunk with whichever
+    subsection it happened to START in. Session 03 cuts where the document says to
+    cut, so the citation describes the whole chunk rather than its first line.
+    """
     manifest = load_manifest()
     candidates: list[dict] = []
     for name, record in sorted(manifest["sources"].items()):
         parser, prefix = PARSERS[name]
-        root, cleaned = parser((CORPUS / name).read_text(encoding="utf-8"), prefix)
-        anchor_list = anchors(root)
+        text = (CORPUS / name).read_text(encoding="utf-8")
+        root, cleaned = parser(text, prefix)
         by_citation = {n.citation: n for n in root.walk() if n.citation}
-        for start in range(0, len(cleaned), CHUNK_SIZE):
-            text = cleaned[start:start + CHUNK_SIZE]
-            cite = citation_at(start, anchor_list) or prefix
+        pieces = chunk_tree(root, cleaned, overlap=overlap)
+        for piece in pieces:
+            cite = piece["citation"]
             node = by_citation.get(cite)
+            # WHY redaction is applied HERE and not to `cleaned` before chunking:
+            # every node offset from src/parse.py indexes into `cleaned`, and a
+            # substitution changes the text LENGTH — "[REDACTED_EMAIL]" is 16
+            # characters where "info@kenyalaw.org" was 17. Redacting first shifts
+            # every offset after the first hit, so the chunker cuts in the wrong
+            # places and passages get citations belonging to their neighbours. It
+            # cost exactly one evaluation question and looked like a redaction
+            # side-effect rather than the offset bug it was.
+            #
+            # This still satisfies s.41's timing requirement: redaction runs in the
+            # ingestion path, before anything reaches the index. A filter applied to
+            # retrieval RESULTS would not — the index would still hold the
+            # identifiers, and the index is the copy that persists.
+            if redact_fn is not None:
+                piece["text"], _ = redact_fn(piece["text"])
+            if not piece["text"].strip():
+                continue
             candidates.append({
-                "passage_id": passage_id(name, cite, start, text),
+                "passage_id": passage_id(name, cite, piece["offset"], piece["text"]),
                 "source": name,
                 "source_version": record["version"],
                 "part": _ancestor_number(root, node, "part"),
-                "section": node.number if node is not None and node.kind == "section" else _ancestor_number(root, node, "section"),
+                "section": node.number if node is not None and node.kind == "section"
+                           else _ancestor_number(root, node, "section"),
                 "subsection": node.number if node is not None and node.kind == "subsection" else None,
                 "citation": cite,
-                "offset": start,
-                "text": text,
+                "offset": piece["offset"],
+                "text": piece["text"],
             })
     return candidates
 
@@ -154,6 +178,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Session 02 · ingestion with provenance")
     ap.add_argument("--verify", action="store_true", help="check sources against the manifest")
     ap.add_argument("--stamp", action="store_true", help="rewrite manifest hashes (deliberate change only)")
+    ap.add_argument("--overlap", type=int, default=100, metavar="N",
+                    help="characters repeated between adjacent chunks (session 03)")
+    ap.add_argument("--redact", action="store_true", help="run the sanitiser before indexing (session 03)")
     args = ap.parse_args()
 
     if args.stamp:
@@ -172,7 +199,11 @@ def main() -> int:
     if args.verify:
         return 0
 
-    candidates = build_candidates()
+    redact_fn = None
+    if args.redact:
+        from src.redact import redact
+        redact_fn = redact
+    candidates = build_candidates(overlap=args.overlap, redact_fn=redact_fn)
     accepted, rejected = publish(candidates)
     write_passages(accepted)
     print(f"accepted  {len(accepted):,} passages")
