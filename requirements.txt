@@ -1,10 +1,45 @@
-# Session 01 dependencies — deliberately tiny.
+# Participant dependencies.
 #
-# Nothing here needs a network connection, an API key, or an account. That is the
-# point: today measures retrieval, and retrieval is measurable offline. Sessions
-# that genuinely need inference will add to this file and say so in their own
-# content pack.
+# ---------------------------------------------------------------------------
+# THIS FILE STOPPED BEING TINY AT SESSION 04, AND THAT IS WORTH SAYING ALOUD
+# ---------------------------------------------------------------------------
+# For three sessions this file was two lines, and it was read aloud in the room as
+# evidence that the work needed almost nothing. Session 04 runs an embedding model,
+# so it needs sentence-transformers, which brings PyTorch with it — a few gigabytes.
+# Pretending otherwise by hiding it in another file would make the claim true of the
+# file and false of the session.
+#
+# So: be precise about which promise ended and which one did not.
+#
+#   ENDED     "this needs almost nothing to install"
+#   HOLDS     no API key, no account, and no network at runtime
+#
+# The second promise is the one the quarter actually rests on, and Session 04 keeps
+# it. The model runs on the laptop. No passage of the corpus and no participant's
+# question leaves the machine — which is the point of DPA s.50, and the architecture
+# Session 08 makes permanent.
+#
+# The models themselves are NOT in this file and NOT in the repository. Fetch them
+# once with:
+#
+#     python tools/fetch_models.py
+#
+# ---------------------------------------------------------------------------
 
-scikit-learn==1.9.0    # TF-IDF index and cosine similarity
-PyYAML==6.0.3          # the evaluation set
-pydantic==2.9.2        # session 02 - the schema contract at the pipeline boundary
+# --- Sessions 01-03 ---
+scikit-learn==1.9.0          # TF-IDF index and cosine similarity
+PyYAML==6.0.3                # the evaluation set
+pydantic==2.9.2              # session 02 - the schema contract at the pipeline boundary
+
+# --- Session 04 · embeddings, BM25 and rank fusion ---
+sentence-transformers==5.1.2  # runs the embedding model locally on CPU (brings torch)
+rank-bm25==0.2.2              # a tested BM25 implementation; saturation + length norm
+
+# --- Session 05 · a persistent store, and the Act's cross-references ---
+chromadb==1.5.9              # persistent vector store; NOT for speed - see the pack
+networkx==3.6.1              # graph traversal over section cross-references
+
+# --- Session 06 · the Model Context Protocol ---
+# v2 speaks protocol revision 2026-07-28. v1.x speaks the superseded handshake, and
+# anything importing mcp.server.fastmcp is on that older line.
+mcp==2.2.0

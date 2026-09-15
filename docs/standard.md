@@ -14,3 +14,7 @@ session that earned it and may be amended by the room.
    data reports what it removed and what it removed wrongly, and no redaction step
    ships without a false positive rate.
 
+4. **(Session 04)** We do not replace one method with another on the strength of a
+   single number. We compare per question, keep what each is good at, and measure the
+   combination — including when the combination turns out to be worse.
+

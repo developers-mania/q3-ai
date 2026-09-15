@@ -9,7 +9,7 @@ Tick a row only when the number moves and the evaluation set shows it.
 | # | Flaw | Named at | Repair | Owner session | Repaired |
 |---|---|---|---|---|---|
 | 1 | Chunks cut across meaning | S01 step 2 | Semantic chunking on section boundaries | 03 | ☑ |
-| 2 | The index matches words, not meaning | S01 step 3 | Dense embeddings, then hybrid search | 04 | ☐ |
+| 2 | The index matches words, not meaning | S01 step 3 | Dense embeddings, then hybrid search | 04 | ☑ |
 | 3 | No re-ranking — the first plausible match wins | S01 step 4 | Two-stage retrieval with a re-ranker | 05 | ☐ |
 | 4 | No confidence threshold — never says "I don't know" | S01 step 4 | Scored guardrails and abstention | 09 | ☐ |
 | 5 | Chunks carry no section number, so no answer can be cited | S01 step 4 | Structure-preserving ingestion | 02, 03 | ☑ |
@@ -42,3 +42,17 @@ The second half added redaction and took some of it back. The naive name rule fi
 739 times at a 100% false positive rate — 80 of them on "Data Commissioner" — and
 costs 6 points of retrieval and 8 of citation. Narrowing recovers all of it. Nothing
 errored; only the score noticed.
+
+**Session 04 (26 August).** Flaw 2 closed. A local bi-encoder gives the system a
+notion of meaning: dense retrieval takes the cohort set from 45% to 55% and wins
+three questions keyword search could not reach, two of them paraphrases.
+
+It is closed, not solved, and the measurement says how. Dense *lowers* citation
+accuracy (28% -> 17%) because an embedding finds the right region and is worse at
+picking the exact subsection. Rank fusion lands BETWEEN its two inputs rather than
+above them at every setting tried, because RRF rewards agreement and the two
+retrievers agree on the easy questions and disagree on exactly the hard ones.
+
+The number that matters for next week: the answer is somewhere in a 30-passage
+shortlist 80% of the time, and reaches rank 1-3 only 50% of the time. Retrieval is
+no longer failing to FIND the answer. It is failing to RECOGNISE it.

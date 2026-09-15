@@ -33,3 +33,13 @@ docs/guides/*.pdf
 passages.jsonl
 quarantine.jsonl
 
+# Embedding and cross-encoder models, fetched by tools/fetch_models.py (session 04).
+# WHY not committed: roughly 90 MB each. Committing both would take a 1.2 MB clone to
+# ~180 MB permanently, for every participant and every session, and git stores binary
+# blobs badly - each re-commit adds another copy. They are reproducible from one
+# command, and once fetched the pipeline is fully offline, which is the property the
+# quarter actually promised. A facilitator can copy models/ onto a USB stick for the
+# room; see sessions/s04/README.md.
+models/
+chroma/
+

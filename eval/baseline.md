@@ -8,6 +8,7 @@ measured against the first row of this table, not against the row above it.
 | 2026-08-05 | 01 | 20 | **50%** | not measurable | Baseline — fixed 500-char chunks, TF-IDF, top 3 |
 | 2026-08-12 | 02 | 20 | 50% | **17%** | Manifest and provenance, structural parser, passage schema, quarantine |
 | 2026-08-19 | 03 | 20 | 45% | **33%** | Structure-aware chunking, measured overlap of 100, redaction with a false positive rate |
+| 2026-08-26 | 04 | 20 | 55% *(dense)* | 17% *(dense)* | Local embeddings, BM25, rank fusion. **Three retrievers — see the note below** |
 
 > **These three rows were measured by the facilitator on 19 August 2026, not recorded
 > in the room.** Session 01 ran without the twenty questions being written down, and
@@ -56,3 +57,29 @@ embeddings are not earning their cost.**
   questions were too easy — harden them before committing.
 - Any change to the corpus makes scores before and after **incomparable**. Record it
   in `docs/decisions.md` and mark the row here.
+
+## Session 04 reports three numbers, not one
+
+From 26 August there is more than one retriever, so a single row misrepresents the
+week. Measured on the cohort set:
+
+| Retriever | Retrieval | Citation |
+|---|---|---|
+| sparse (BM25) | 45% | **28%** |
+| dense | **55%** | 17% |
+| fused (RRF) | 50% | 22% |
+
+The headline row above records **dense**, because it is the best retrieval figure and
+retrieval accuracy is the quarter's headline metric. It is not the best on citation,
+and pretending otherwise by picking a different retriever per column would make the
+table a scoreboard rather than a measurement.
+
+**Rank fusion did not beat both inputs**, which is what the Content Pack predicts.
+Measured at every combination of pool and `rrf_k`, it lands between them. RRF rewards
+agreement, and here the two retrievers agree on the easy questions and disagree on
+exactly the hard ones.
+
+**The number that matters for Session 05** is not in this table: the answer is
+somewhere in a 30-passage shortlist **80%** of the time and reaches rank 1–3 about
+**50%** of the time. That 30-point gap is what re-ranking exists to close, and it is
+the ceiling on what re-ranking can achieve.
