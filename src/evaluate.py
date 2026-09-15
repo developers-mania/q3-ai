@@ -51,6 +51,10 @@ def retrieve(question: str, passages, vectorizer, matrix, k: int = TOP_K) -> lis
     return [passages[i] for i in scores.argsort()[::-1][:k]]
 
 
+def tag_label(tag: str) -> str:
+    return {"near_miss": "near-miss ", "paraphrase": "paraphrase"}.get(tag, tag)
+
+
 def section_of(citation: str) -> str:
     """'DPA s.43(1)(a)' -> 'DPA s.43'. Used only for the near-miss diagnostic."""
     return citation.split("(")[0].strip()
@@ -118,7 +122,33 @@ def evaluate_with(questions: list[dict], passages, search_fn) -> dict:
         "near": near,
         "n": len(questions),
         "citable_n": citable_n,
+        "by_tag": _by_tag(questions, rows),
     }
+
+
+def _by_tag(questions: list[dict], rows) -> dict[str, tuple[int, int]]:
+    """Retrieval hits per tagged subset: {tag: (hits, total)}.
+
+    WHY report subsets at all. The near-miss questions have been failing since
+    5 August while the overall number improved, and an average hides exactly the
+    questions a system finds hard. The overall score is the headline; the near-miss
+    score is what tells you whether the system is getting genuinely better or merely
+    getting easy questions right.
+
+    If the overall number rises while the near-miss number does not, the system is
+    improving in the place that matters least.
+    """
+    found = {r[0]: (r[1], r[2], r[5].startswith("DPA")) for r in rows}
+    out: dict[str, list[int]] = {}
+    for q in questions:
+        got_r, got_c, cit = found.get(q["id"], (False, False, False))
+        for tag in q.get("tags", []):
+            acc = out.setdefault(tag, [0, 0, 0, 0])
+            acc[0] += bool(got_r)
+            acc[1] += 1
+            acc[2] += bool(got_c)
+            acc[3] += bool(cit)
+    return {k: tuple(v) for k, v in sorted(out.items())}
 
 
 def main() -> int:
@@ -178,6 +208,10 @@ def main() -> int:
         print("           subsection. Until Session 03 that was the fixed-width cut straddling")
         print("           a boundary; after it, the usual cause is a chunk matching on text")
         print("           borrowed from its neighbour through overlap.")
+    for tag, (r_got, r_tot, c_got, c_tot) in result["by_tag"].items():
+        cite = f"{c_got}/{c_tot} = {c_got / c_tot:.0%}" if c_tot else "n/a"
+        print(f"  {tag_label(tag)}  retrieval {r_got}/{r_tot} = {r_got / r_tot:>4.0%}"
+              f"   citation {cite}")
     if seed:
         print("Not the cohort baseline — that is scored against eval/questions.yaml.")
     return 0
