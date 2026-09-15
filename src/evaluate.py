@@ -71,11 +71,30 @@ def citable(q: dict) -> bool:
 
 
 def evaluate(questions: list[dict], passages, vectorizer, matrix) -> dict:
+    """Score the Session 02 TF-IDF retriever.
+
+    Kept with its original signature so the Session 02 and 03 labs, and the tags
+    that hold them, go on working unchanged. Session 04 introduced more than one
+    retriever, so the scoring moved into evaluate_with() below and this became a
+    thin wrapper. Fix forward: add, do not break.
+    """
+    return evaluate_with(
+        questions, passages,
+        lambda question, k: retrieve(question, passages, vectorizer, matrix, k),
+    )
+
+
+def evaluate_with(questions: list[dict], passages, search_fn) -> dict:
+    """Score any retriever.
+
+    search_fn(question, k) -> list of passage dicts, best first. Everything from
+    Session 04 on plugs in here: BM25, dense, fused, re-ranked, or a tool call.
+    """
     retrieval_hits = citation_hits = near = 0
     citable_n = 0
     rows = []
     for q in questions:
-        results = retrieve(q["question"], passages, vectorizer, matrix)
+        results = search_fn(q["question"], TOP_K)
         wanted = [normalise_for_match(s) for s in expected_strings(q)]
         found = any(any(w in normalise_for_match(p["text"]) for w in wanted) for p in results)
 
