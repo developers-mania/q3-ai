@@ -18,3 +18,6 @@ session that earned it and may be amended by the room.
    single number. We compare per question, keep what each is good at, and measure the
    combination — including when the combination turns out to be worse.
 
+5. **(Session 05)** Hard cases are scored separately. A system is judged on the
+   questions it finds difficult, not on the average that hides them.
+

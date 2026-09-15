@@ -9,6 +9,7 @@ measured against the first row of this table, not against the row above it.
 | 2026-08-12 | 02 | 20 | 50% | **17%** | Manifest and provenance, structural parser, passage schema, quarantine |
 | 2026-08-19 | 03 | 20 | 45% | **33%** | Structure-aware chunking, measured overlap of 100, redaction with a false positive rate |
 | 2026-08-26 | 04 | 20 | 55% *(dense)* | 17% *(dense)* | Local embeddings, BM25, rank fusion. **Three retrievers — see the note below** |
+| 2026-09-02 | 05 | 20 | 50% | **28%** | ChromaDB, cross-encoder re-ranking at shortlist 30, cross-reference graph |
 
 > **These three rows were measured by the facilitator on 19 August 2026, not recorded
 > in the room.** Session 01 ran without the twenty questions being written down, and
@@ -83,3 +84,22 @@ exactly the hard ones.
 somewhere in a 30-passage shortlist **80%** of the time and reaches rank 1–3 about
 **50%** of the time. That 30-point gap is what re-ranking exists to close, and it is
 the ceiling on what re-ranking can achieve.
+
+## Session 05 adds subset scores
+
+From 2 September the run reports the hard subsets separately, because the average was
+hiding them:
+
+| Subset | Retrieval | Citation |
+|---|---|---|
+| all questions | 50% | 28% |
+| `near_miss` (5) | 5/5 | **3/5** |
+| `paraphrase` (5) | **0/5** | 0/5 |
+
+The near-miss questions pass on retrieval and fail on citation — they are near-misses
+in *which subsection*, not in *whether the region was found*. The genuinely hard
+subset is **paraphrase, still 0/5**, unchanged since 5 August despite embeddings
+arriving in Session 04.
+
+**Shortlist recall is 80% against a score of 50%.** The answer is usually found and
+then mis-ranked, which is where the remaining 30 points live.

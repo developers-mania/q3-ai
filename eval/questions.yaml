@@ -44,6 +44,12 @@
 #             to the subsection.
 #   note      Optional. Flag near-miss traps and their pair here.
 #   by        Optional. `room` for questions contributed by participants.
+#   tags      Optional. Subsets reported separately from Session 05 onward:
+#               near_miss   wording close to another question, answer different.
+#                           These have been failing since 5 August while the overall
+#                           number improved - the average was hiding them.
+#               paraphrase  same answer as another question, ordinary wording.
+#                           Written to fail until embeddings arrived in Session 04.
 #
 # ---------------------------------------------------------------------------
 # THE `answer` / `expect` RULE
@@ -92,6 +98,7 @@
   answer: "7 days"
   expect: ["within seven days"]
   source: "DPA s.6(2)"
+  tags: [near_miss]
 
 - id: q02
   question: >-
@@ -105,6 +112,7 @@
     "twenty-one days" alone also matches s.58(2)(c), the minimum period an
     enforcement notice must allow — a different answer entirely. The expect string
     is the long form for that reason.
+  tags: [near_miss]
 
 - id: q03
   question: >-
@@ -126,6 +134,7 @@
   note: >-
     NEAR-MISS FAMILY with q05 and q06. "three months" appears three times in the
     Act and means something different each time.
+  tags: [near_miss]
 
 - id: q05
   question: >-
@@ -135,6 +144,7 @@
   expect: ["within three months after the end of each financial year"]
   source: "DPA s.70(1)"
   note: "NEAR-MISS with q04 and q06."
+  tags: [near_miss]
 
 - id: q06
   question: >-
@@ -146,6 +156,7 @@
   note: >-
     NEAR-MISS with q04 and q05, and the hardest of the three — it shares a section
     with q05 and differs only in who acts and from when the clock runs.
+  tags: [near_miss]
 
 # --- Obligations, rights and transfers ---
 
@@ -250,6 +261,7 @@
   expect: ["a data centre located in Kenya"]
   source: "DPA s.50"
   note: "PARAPHRASE of q07. Expected MISS until Session 04."
+  tags: [paraphrase]
 
 - id: q17
   question: >-
@@ -259,6 +271,7 @@
   expect: ["within three months after the end of each financial year"]
   source: "DPA s.70(1)"
   note: "PARAPHRASE of q05. Expected MISS until Session 04."
+  tags: [paraphrase]
 
 - id: q18
   question: >-
@@ -268,6 +281,7 @@
   expect: ["deletion of false or misleading data"]
   source: "DPA s.26(e)"
   note: "PARAPHRASE of q10. Expected MISS until Session 04."
+  tags: [paraphrase]
 
 - id: q19
   question: >-
@@ -277,6 +291,7 @@
   expect: ["preservation order for the expeditious preservation"]
   source: "DPA s.66"
   note: "PARAPHRASE of q08. Expected MISS until Session 04."
+  tags: [paraphrase]
 
 - id: q20
   question: >-
@@ -286,3 +301,4 @@
   expect: ["periodical audits"]
   source: "DPA s.23"
   note: "PARAPHRASE of q09. Expected MISS until Session 04."
+  tags: [paraphrase]
