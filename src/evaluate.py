@@ -125,6 +125,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Session 02 · retrieval AND citation accuracy")
     ap.add_argument("--questions", metavar="PATH", type=Path, default=QUESTIONS)
     ap.add_argument("--quiet", action="store_true", help="numbers only, no per-question rows")
+    # WHY a flag rather than swapping the default: every row in eval/baseline.md was
+    # measured with a named retriever, and a default that silently changed between
+    # sessions would make those rows incomparable - which is the one thing the
+    # baseline exists to prevent.
+    ap.add_argument("--retriever", default="tfidf",
+                    choices=["tfidf", "sparse", "dense", "fused"],
+                    help="tfidf is Sessions 01-03; the rest arrive in Session 04")
     args = ap.parse_args()
 
     path = args.questions
@@ -135,8 +142,22 @@ def main() -> int:
         return 0
 
     passages = load_passages()
-    vectorizer, matrix = build_index(passages)
-    result = evaluate(questions, passages, vectorizer, matrix)
+    if args.retriever == "tfidf":
+        vectorizer, matrix = build_index(passages)
+        result = evaluate(questions, passages, vectorizer, matrix)
+    else:
+        from src.embed import embed_corpus, load_model
+        from src.retrieve import build_sparse, search_dense, search_fused, search_sparse
+
+        model = load_model()
+        emb = embed_corpus(passages, model)
+        bm25 = build_sparse(passages)
+        search = {
+            "sparse": lambda q, k=TOP_K: search_sparse(q, bm25, passages, k),
+            "dense": lambda q, k=TOP_K: search_dense(q, model, emb, passages, k),
+            "fused": lambda q, k=TOP_K: search_fused(q, bm25, model, emb, passages, k),
+        }[args.retriever]
+        result = evaluate_with(questions, passages, search)
 
     if not args.quiet:
         print(f"{'id':<5} {'RETR':<5} {'CITE':<5} top citation      expected")
